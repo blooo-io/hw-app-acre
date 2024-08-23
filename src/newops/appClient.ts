@@ -6,6 +6,7 @@ import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
+import {log } from "@ledgerhq/logs";
 
 const CLA_BTC = 0xe1;
 const CLA_FRAMEWORK = 0xf8;
@@ -40,7 +41,13 @@ export class AppClient {
     data: Buffer,
     cci?: ClientCommandInterpreter,
   ): Promise<Buffer> {
+    // CONCAT CLA INS P1 P2 AND data
+    const APDU = Buffer.concat([Buffer.from([CLA_BTC, ins, 0, 0]), data]);
+    log("apdu IN:", APDU.toString("hex"));
+    log('apdu IN', "workokok")
+    console.log("apdu IN:", APDU.toString("hex"));
     let response: Buffer = await this.transport.send(CLA_BTC, ins, 0, 0, data, [0x9000, 0xe000]);
+    console.log("apdu OUT:", response.toString("hex"));
     while (response.readUInt16BE(response.length - 2) === 0xe000) {
       if (!cci) {
         throw new Error("Unexpected SW_INTERRUPTED_EXECUTION");
@@ -48,6 +55,11 @@ export class AppClient {
 
       const hwRequest = response.slice(0, -2);
       const commandResponse = cci.execute(hwRequest);
+
+      // CONCAT CLA INS P1 P2 AND CommandResponse
+      const APDU = Buffer.concat([Buffer.from([CLA_BTC, ins, 0, 0]), commandResponse]);
+      log("apdu IN:", APDU.toString("hex"));
+      console.log("apdu IN:", APDU.toString("hex"));
 
       response = await this.transport.send(
         CLA_FRAMEWORK,
@@ -79,6 +91,7 @@ export class AppClient {
     addressIndex: number,
     display: boolean,
   ): Promise<string> {
+    log("in client getWalletAddress", "workokok")
     if (change !== 0 && change !== 1) throw new Error("Change can only be 0 or 1");
     if (addressIndex < 0 || !Number.isInteger(addressIndex))
       throw new Error("Invalid address index");

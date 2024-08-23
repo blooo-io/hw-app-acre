@@ -25,6 +25,7 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
+import { log } from "@ledgerhq/logs";
 
 /**
  * @class BtcNew
@@ -113,6 +114,7 @@ export default class BtcNew {
     if (!isPathNormal(path)) {
       throw Error(`non-standard path: ${path}`);
     }
+    log("getWalletPublicKey", 'workok');
     const pathElements: number[] = pathStringToArray(path);
     const xpub = await this.client.getExtendedPubkey(false, pathElements);
 
@@ -156,6 +158,7 @@ export default class BtcNew {
     if (accountPath.length + 2 != pathElements.length) {
       return "";
     }
+    log("getWalletAddress", 'workok');
     const accountXpub = await this.client.getExtendedPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
     const policy = new WalletPolicy(
@@ -163,13 +166,15 @@ export default class BtcNew {
       createKey(masterFingerprint, accountPath, accountXpub),
     );
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
-    return this.client.getWalletAddress(
+    let rtn = this.client.getWalletAddress(
       policy,
       Buffer.alloc(32, 0),
       changeAndIndex[0],
       changeAndIndex[1],
       display,
     );
+    // log("data getWalletAddress", rtn);
+    return rtn;
   }
 
   /**
