@@ -24,31 +24,35 @@ import {
   wrappedP2wpkh,
   wrappedP2wpkhTwoInputs,
 } from "./testtx";
+import { AppClient } from "../../src/newops/appClient";
 import { listen, log } from "@ledgerhq/logs";
 listen(log => console.log(log));
 
-// test("getWalletPublicKey p2pkh", async () => {
-//   await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
-//   await testGetWalletPublicKey("m/44'/0'/17'", "pkh(@0)");
-// });
+test("getWalletPublicKey p2pkh", async () => {
+  await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
+  await testGetWalletPublicKey("m/44'/0'/17'", "pkh(@0)");
+});
 test("getWalletPublicKey p2wpkh", async () => {
   await testGetWalletPublicKey("m/84'/1'/0'", "wpkh(@0)");
   await testGetWalletPublicKey("m/84'/0'/17'", "wpkh(@0)");
 });
-// test("getWalletPublicKey wrapped p2wpkh", async () => {
-//   await testGetWalletPublicKey("m/49'/1'/0'", "sh(wpkh(@0))");
-//   await testGetWalletPublicKey("m/49'/0'/17'", "sh(wpkh(@0))");
-// });
-// test("getWalletPublicKey p2tr", async () => {
-//   await testGetWalletPublicKey("m/86'/1'/0'", "tr(@0)");
-//   await testGetWalletPublicKey("m/86'/0'/17'", "tr(@0)");
-// });
+test("testGetWalletPublicKeyRealClient p2wpkh", async () => {
+  await testGetWalletPublicKeyRealClient("m/84'/1'/0'", "wpkh(@0)");
+});
+test("getWalletPublicKey wrapped p2wpkh", async () => {
+  await testGetWalletPublicKey("m/49'/1'/0'", "sh(wpkh(@0))");
+  await testGetWalletPublicKey("m/49'/0'/17'", "sh(wpkh(@0))");
+});
+test("getWalletPublicKey p2tr", async () => {
+  await testGetWalletPublicKey("m/86'/1'/0'", "tr(@0)");
+  await testGetWalletPublicKey("m/86'/0'/17'", "tr(@0)");
+});
 
-// test("getWalletXpub normal path", async () => {
-//   await testGetWalletXpub("m/11'/12'");
-//   await testGetWalletXpub("m/11");
-//   await testGetWalletXpub("m/44'/0'/0'");
-// });
+test("getWalletXpub normal path", async () => {
+  await testGetWalletXpub("m/11'/12'");
+  await testGetWalletXpub("m/11");
+  await testGetWalletXpub("m/44'/0'/0'");
+});
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   const basePath = `m/${type}/1'/0'/`;
@@ -63,47 +67,47 @@ function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   return { ins };
 }
 
-// test("Sign p2pkh", async () => {
-//   const changePubkey = "037ed58c914720772c59f7a1e7e76fba0ef95d7c5667119798586301519b9ad2cf";
-//   await runSignTransactionTest(p2pkh, StandardPurpose.p2pkh, changePubkey);
-// });
-// test("Sign p2wpkh wrapped", async () => {
-//   let changePubkey = "03efc6b990c1626d08bd176aab0e545a4f55c627c7ddee878d12bbbc46a126177a";
-//   await runSignTransactionTest(wrappedP2wpkh, StandardPurpose.p2wpkhInP2sh, changePubkey);
-//   changePubkey = "031175a985c56e310ce3496a819229b427a2172920fd20b5972dda62758c6def09";
-//   await runSignTransactionTest(wrappedP2wpkhTwoInputs, StandardPurpose.p2wpkhInP2sh, changePubkey);
-// });
+test("Sign p2pkh", async () => {
+  const changePubkey = "037ed58c914720772c59f7a1e7e76fba0ef95d7c5667119798586301519b9ad2cf";
+  await runSignTransactionTest(p2pkh, StandardPurpose.p2pkh, changePubkey);
+});
+test("Sign p2wpkh wrapped", async () => {
+  let changePubkey = "03efc6b990c1626d08bd176aab0e545a4f55c627c7ddee878d12bbbc46a126177a";
+  await runSignTransactionTest(wrappedP2wpkh, StandardPurpose.p2wpkhInP2sh, changePubkey);
+  changePubkey = "031175a985c56e310ce3496a819229b427a2172920fd20b5972dda62758c6def09";
+  await runSignTransactionTest(wrappedP2wpkhTwoInputs, StandardPurpose.p2wpkhInP2sh, changePubkey);
+});
     test("Sign p2wpkh", async () => {
       await runSignTransactionTest(p2wpkh, StandardPurpose.p2wpkh);
     });
-// test("Sign p2tr", async () => {
-//   // This tx uses locktime, so this test verifies that locktime is propagated to/from
-//   // the psbt correctly.
-//   await runSignTransactionTest(p2tr, StandardPurpose.p2tr);
-// });
+test("Sign p2tr", async () => {
+  // This tx uses locktime, so this test verifies that locktime is propagated to/from
+  // the psbt correctly.
+  await runSignTransactionTest(p2tr, StandardPurpose.p2tr);
+});
 
-// test("Sign p2tr with sigHashType", async () => {
-//   const testTx = JSON.parse(JSON.stringify(p2tr));
-//   testTx.vin.forEach((input: CoreInput) => {
-//     // Test SIGHASH_SINGLE | SIGHASH_ANYONECANPAY, 0x83
-//     const sig = input.txinwitness![0] + "83";
-//     input.txinwitness = [sig];
-//   });
-//   await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
-//   // The verification of the sighashtype is done in MockClient.signPsbt
-// });
+test("Sign p2tr with sigHashType", async () => {
+  const testTx = JSON.parse(JSON.stringify(p2tr));
+  testTx.vin.forEach((input: CoreInput) => {
+    // Test SIGHASH_SINGLE | SIGHASH_ANYONECANPAY, 0x83
+    const sig = input.txinwitness![0] + "83";
+    input.txinwitness = [sig];
+  });
+  await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
+  // The verification of the sighashtype is done in MockClient.signPsbt
+});
 
-// test("Sign p2tr sequence 0", async () => {
-//   const testTx = JSON.parse(JSON.stringify(p2tr));
-//   testTx.vin.forEach((input: CoreInput) => {
-//     input.sequence = 0;
-//   });
-//   const tx = await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
-//   const txObj = splitTransaction(tx, true);
-//   txObj.inputs.forEach(input => {
-//     expect(input.sequence.toString("hex")).toEqual("00000000");
-//   });
-// });
+test("Sign p2tr sequence 0", async () => {
+  const testTx = JSON.parse(JSON.stringify(p2tr));
+  testTx.vin.forEach((input: CoreInput) => {
+    input.sequence = 0;
+  });
+  const tx = await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
+  const txObj = splitTransaction(tx, true);
+  txObj.inputs.forEach(input => {
+    expect(input.sequence.toString("hex")).toEqual("00000000");
+  });
+});
 
 async function runSignTransactionTest(
   testTx: CoreTx,
@@ -163,7 +167,6 @@ async function testGetWalletPublicKey(
   );
 
   const btcNew = new BtcNew(client);
-  log('test', 'workok')
   const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
   const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
   log('address', result.bitcoinAddress)
@@ -171,6 +174,57 @@ async function testGetWalletPublicKey(
   console.log('notworkingforsure')
   const resultAccount = await btcNew.getWalletPublicKey(accountPath);
   verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
+}
+
+async function testGetWalletPublicKeyRealClient(
+  accountPath: string,
+  expectedDescriptorTemplate: DefaultDescriptorTemplate,
+) {
+  const transport = await openTransportReplayer(RecordStore.fromString(`
+    => e10000001600058000005480000001800000000000000000000000
+    <= 74707562444742337234346d37666a654c36676a6b75456e6e5a6e586677646e7a71524b6b713961636576354d464755653631766179326e6e3270427a56654e546d613563745733415746524a644c65707a737a35503332676a4d426268687837684b6434664a4d587361635a364c9000
+    => e10000000e0003800000548000000180000000
+    <= 747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431509000
+    => e105000000
+    <= f5acc2fd9000
+    => e10300004600893198490079bb0667594bfa902274b1cd28d7ed9df140121dc69021bead679f00000000000000000000000000000000000000000000000000000000000000000000000000
+    <= 4000893198490079bb0667594bfa902274b1cd28d7ed9df140121dc69021bead679fe000
+    => f80100002e2c2c01000877706b682840302901ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340
+    <= 41ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400100e000
+    => f801000022ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400000
+    <= 4000ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340e000
+    => f8010000898787005b66356163633266642f3834272f31272f30275d747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431502f2a2a
+    <= 41ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400100e000
+    => f801000022ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400000
+    <= 4000ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340e000
+    => f8010000898787005b66356163633266642f3834272f31272f30275d747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431502f2a2a
+    <= 746231717a647237733273723064776d6b777830333372346e756a7a6b38367530637936666d7a666a6b9000
+    => e10000000e0003800000548000000180000000
+    <= 747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431509000
+    `));
+  const client = new AppClient(transport);
+  const path = accountPath + "/0/0";
+  // const accountXpub =
+  //   "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
+  // const keyXpub =
+  //   "tpubDHcN44A4UHqdHJZwBxgTbu8Cy87ZrZkN8tQnmJGhcijHqe4rztuvGcD4wo36XSviLmiqL5fUbDnekYaQ7LzAnaqauBb9RsyahsTTFHdeJGd";
+  // client.getPubkeyResponse(accountPath, accountXpub);
+  // client.mockGetPubkeyResponse(path, keyXpub);
+  // const key = `[${masterFingerprint.toString("hex")}${accountPath.substring(1)}]${accountXpub}/**`;
+  // client.mockGetWalletAddressResponse(
+  //   new WalletPolicy(expectedDescriptorTemplate, key),
+  //   0,
+  //   0,
+  //   "testaddress",
+  // );
+
+  const btcNew = new BtcNew(client);
+  const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
+  const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
+  log('address', result.bitcoinAddress)
+  // verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
+  const resultAccount = await btcNew.getWalletPublicKey(accountPath);
+  // verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
 }
 
 function verifyGetWalletPublicKeyResult(
