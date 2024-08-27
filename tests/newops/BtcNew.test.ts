@@ -39,6 +39,9 @@ test("getWalletPublicKey p2wpkh", async () => {
 test("testGetWalletPublicKeyRealClient p2wpkh", async () => {
   await testGetWalletPublicKeyRealClient("m/84'/1'/0'", "wpkh(@0)");
 });
+test("testSignMessageRealClient", async () => {
+  await testSignMessageRealClient("m/84'/1'/0'");
+});
 test("getWalletPublicKey wrapped p2wpkh", async () => {
   await testGetWalletPublicKey("m/49'/1'/0'", "sh(wpkh(@0))");
   await testGetWalletPublicKey("m/49'/0'/17'", "sh(wpkh(@0))");
@@ -225,6 +228,30 @@ async function testGetWalletPublicKeyRealClient(
   // verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
   const resultAccount = await btcNew.getWalletPublicKey(accountPath);
   // verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
+}
+
+async function testSignMessageRealClient(
+  accountPath: string,
+) {
+  // try createTransportRecorder
+  const transport = await openTransportReplayer(RecordStore.fromString(`
+    => e11000003605800000548000000180000000000000000000000004dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e
+    <= 41dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0100e000
+    => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
+    <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
+    => f80100000705050074657374
+    <= 41dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0100e000
+    => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
+    <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
+    => f80100000705050074657374
+    <= 1f32af834dbf7e64f730a1fb76d1970cb66517222bfb017f46a75f91cc1fa216b76fd35df48d28b9c2c4b994e7799608cc1353ae810d1049a8ab8af047e16a1a999000
+    `));
+  const client = new AppClient(transport);
+  const path = accountPath + "/0/0";
+
+  const btcNew = new BtcNew(client);
+  const result = await btcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
+  console.log('v,r,s: ', result)
 }
 
 function verifyGetWalletPublicKeyResult(
