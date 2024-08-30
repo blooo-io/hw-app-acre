@@ -7,6 +7,7 @@ import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import {log } from "@ledgerhq/logs";
+import { AcreWithdrawalData } from "../types";
 
 const CLA_BTC = 0xe1;
 const CLA_FRAMEWORK = 0xf8;
@@ -196,5 +197,35 @@ export class AppClient {
     );
 
     return response.toString("base64");
+  }
+
+  async signWithdrawal(
+    pathElements: number[],
+    message: Buffer,
+    withdrawalData: Buffer
+  ): Promise<string> {
+    if (pathElements.length > 6) {
+      throw new Error("Path too long. At most 6 levels allowed.");
+    }
+
+    const clientInterpreter = new ClientCommandInterpreter(() => {});
+
+    // prepare ClientCommandInterpreter
+    const nChunks = Math.ceil(message.length / 64);
+    const chunks: Buffer[] = [];
+    for (let i = 0; i < nChunks; i++) {
+      chunks.push(message.subarray(64 * i, 64 * i + 64));
+    }
+
+    clientInterpreter.addKnownList(chunks);
+    const chunksRoot = new Merkle(chunks.map(m => hashLeaf(m))).getRoot();
+
+    const response = await this.makeRequest(
+      BitcoinIns.SIGN_MESSAGE,
+      Buffer.concat([pathElementsToBuffer(pathElements), createVarint(message.length), chunksRoot]),
+      clientInterpreter,
+    );
+
+    return response.slice(0, 64).toString("hex");
   }
 }

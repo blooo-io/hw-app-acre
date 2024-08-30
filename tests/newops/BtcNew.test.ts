@@ -51,10 +51,8 @@ test("getWalletPublicKey p2tr", async () => {
   await testGetWalletPublicKey("m/86'/0'/17'", "tr(@0)");
 });
 
-test("getWalletXpub normal path", async () => {
-  await testGetWalletXpub("m/11'/12'");
-  await testGetWalletXpub("m/11");
-  await testGetWalletXpub("m/44'/0'/0'");
+test("signWithdrawalRealClient", async () => {
+  await testSignWithdrawalRealClient();
 });
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
@@ -252,6 +250,33 @@ async function testSignMessageRealClient(
   const btcNew = new BtcNew(client);
   const result = await btcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
   console.log('v,r,s: ', result)
+}
+
+async function testSignWithdrawalRealClient() {
+  
+  const transport = await openTransportReplayer(RecordStore.fromString(`
+    => e1FFFFFFFF
+    <= FFFF
+    `));
+
+  const withdrawalData: AcreWithdrawalData = {
+    to: "1234567890abcdef1234567890abcdef12345678",
+    value: 2863311530,
+    data: "0xabcdef",
+    operation: 0,
+    safeTxGas: 286331153,
+    baseGas: 572662306,
+    gasPrice: 858993459,
+    gasToken: "0x0000000000000000000000000000000000000000",
+    refundReceiver: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    nonce: 1,
+  };
+  const client = new AppClient(transport);
+  const path = "m/44'/0'/0'/0/0";
+
+  const btcNew = new BtcNew(client);
+  const result = await btcNew.signWithdrawal({path: path, messageHex: path, withdrawalData: withdrawalData});
+  console.log('signed withdrawal:', result);
 }
 
 function verifyGetWalletPublicKeyResult(

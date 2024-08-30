@@ -24,7 +24,7 @@ import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
-import type { Transaction } from "./types";
+import type { Transaction, AcreWithdrawalData } from "./types";
 import { log } from "@ledgerhq/logs";
 
 /**
@@ -313,6 +313,88 @@ export default class BtcNew {
       s,
     };
   }
+  cleanHexPrefix(hexString: string): string {
+    return hexString.startsWith("0x") ? hexString.slice(2) : hexString;
+  }
+
+  formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): Buffer {
+    console.log("withdrawalData", withdrawalData);
+    console.log("dataLength", withdrawalData.data.length);
+    const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to), "hex").slice(-20);
+
+    const value = Buffer.alloc(32);
+    value.writeBigUInt64BE(BigInt(withdrawalData.value), 24);
+
+    const dataLength = Buffer.alloc(8);
+    dataLength.writeUInt32BE(withdrawalData.data.length);
+
+    const data = Buffer.from(this.cleanHexPrefix(withdrawalData.data), "hex");
+
+    const operation = Buffer.alloc(1);
+    operation.writeUInt8(withdrawalData.operation);
+
+    const safeTxGas = Buffer.alloc(32);
+    safeTxGas.writeBigUInt64BE(BigInt(withdrawalData.safeTxGas));
+
+    const baseGas = Buffer.alloc(32);
+    baseGas.writeBigUInt64BE(BigInt(withdrawalData.baseGas));
+
+    const gasPrice = Buffer.alloc(32);
+    gasPrice.writeBigUInt64BE(BigInt(withdrawalData.gasPrice));
+
+    const gasToken = Buffer.from(this.cleanHexPrefix(withdrawalData.gasToken.toString()), "hex").slice(-20);
+    
+    const refundReceiver = Buffer.from(this.cleanHexPrefix(withdrawalData.refundReceiver), "hex").slice(-20);
+
+    const nonce = Buffer.alloc(32);
+    nonce.writeBigUInt64BE(BigInt(withdrawalData.nonce), 24);
+
+    console.log("value", value.toString("hex"));
+
+    console.log("to", to.toString("hex").padStart(40, '0'), 
+              "\nvalue", value.toString("hex").padStart(64, '0'), 
+              "\ndataLength", dataLength.toString("hex").padStart(64, '0'), 
+              "\ndata", data.toString("hex"), 
+              "\noperation", operation.toString("hex").padStart(2, '0'), 
+              "\nsafeTxGas", safeTxGas.toString("hex").padStart(64, '0'), 
+              "\nbaseGas", baseGas.toString("hex").padStart(64, '0'), 
+              "\ngasPrice", gasPrice.toString("hex").padStart(64, '0'), 
+              "\ngasToken", gasToken.toString("hex").padStart(40, '0'), 
+              "\nrefundReceiver", refundReceiver.toString("hex").padStart(40, '0'), 
+              "\nnonce", nonce.toString("hex").padStart(64, '0'));
+
+    return Buffer.concat([to, value, dataLength, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce]);
+}
+
+  /**
+   * Signs an Acre Withdrawal message with the private key at
+   * the provided derivation path according to the Bitcoin Signature format
+   * and returns v, r, s.
+   */
+    async signWithdrawal({ path, messageHex, withdrawalData }: { path: string; messageHex: string; withdrawalData: AcreWithdrawalData }): Promise<{
+      v: number;
+      r: string;
+      s: string;
+    }> {
+      const pathElements: number[] = pathStringToArray(path);
+      const message = Buffer.from(messageHex, "hex");
+      const withdrawalDataBuffer = this.formatAcreWithdrawalData(withdrawalData);
+      console.log("withdrawalDataBuffer", withdrawalDataBuffer.toString("hex"));
+
+      // To change after this point
+      const sig = await this.client.signWithdrawal(pathElements, message, withdrawalDataBuffer);
+      const buf = Buffer.from(sig, "base64");
+  
+      const v = buf.readUInt8() - 27 - 4;
+      const r = buf.slice(1, 33).toString("hex");
+      const s = buf.slice(33, 65).toString("hex");
+  
+      return {
+        v,
+        r,
+        s,
+      };
+    }
 
   /**
    * Calculates an output script along with public key and possible redeemScript
