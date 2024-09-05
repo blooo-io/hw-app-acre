@@ -42,15 +42,28 @@ export interface Transaction {
 
 export interface AcreWithdrawalData {
   to: string;
-  value: number;
+  value: string;
   data: string;
-  operation: number;
-  safeTxGas: number;
-  baseGas: number;
-  gasPrice: number;
+  operation: string;
+  safeTxGas: string;
+  baseGas: string;
+  gasPrice: string;
   gasToken: string;
   refundReceiver: string;
-  nonce: number;
+  nonce: string;
+}
+
+export interface AcreWithdrawalDataBuffer {
+  to: Buffer;
+  value: Buffer;
+  data: Buffer;
+  operation: Buffer;
+  safeTxGas: Buffer;
+  baseGas: Buffer;
+  gasPrice: Buffer;
+  gasToken: Buffer;
+  refundReceiver: Buffer;
+  nonce: Buffer;
 }
 
 export interface TrustedInput {

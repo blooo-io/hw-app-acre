@@ -53,7 +53,7 @@ test("getWalletPublicKey p2tr", async () => {
 
 test("signWithdrawalRealClient", async () => {
   await testSignWithdrawalRealClient();
-});
+}, 10 * 60 * 1000);
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   const basePath = `m/${type}/1'/0'/`;
@@ -254,28 +254,25 @@ async function testSignMessageRealClient(
 
 async function testSignWithdrawalRealClient() {
   
-  const transport = await openTransportReplayer(RecordStore.fromString(`
-    => e1FFFFFFFF
-    <= FFFF
-    `));
+  const transport = new SpeculosTransport("http://localhost:5000")
 
   const withdrawalData: AcreWithdrawalData = {
-    to: "1234567890abcdef1234567890abcdef12345678",
-    value: 2863311530,
-    data: "0xabcdef",
-    operation: 0,
-    safeTxGas: 286331153,
-    baseGas: 572662306,
-    gasPrice: 858993459,
+    to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
+    value: "0x0",
+    data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a9143c6480044cfafde6dad7f718f76938cc87d0679a88ac000000000000",
+    operation: "0",
+    safeTxGas: "0x0",
+    baseGas: "0x0",
+    gasPrice: "0x0",
     gasToken: "0x0000000000000000000000000000000000000000",
-    refundReceiver: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-    nonce: 1,
+    refundReceiver: "0x0000000000000000000000000000000000000000",
+    nonce: "0xC",
   };
   const client = new AppClient(transport);
   const path = "m/44'/0'/0'/0/0";
 
   const btcNew = new BtcNew(client);
-  const result = await btcNew.signWithdrawal({path: path, messageHex: path, withdrawalData: withdrawalData});
+  const result = await btcNew.signWithdrawal({path: path, withdrawalData: withdrawalData});
   console.log('signed withdrawal:', result);
 }
 

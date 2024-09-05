@@ -24,7 +24,7 @@ import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
-import type { Transaction, AcreWithdrawalData } from "./types";
+import type { Transaction, AcreWithdrawalData, AcreWithdrawalDataBuffer } from "./types";
 import { log } from "@ledgerhq/logs";
 
 /**
@@ -317,53 +317,56 @@ export default class BtcNew {
     return hexString.startsWith("0x") ? hexString.slice(2) : hexString;
   }
 
-  formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): Buffer {
+  formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): AcreWithdrawalDataBuffer {
     console.log("withdrawalData", withdrawalData);
     console.log("dataLength", withdrawalData.data.length);
-    const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to), "hex").slice(-20);
+    const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to.toString()), "hex").slice(-20);
 
+    let withdrawalValueBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.value), "hex").slice(-32);
     const value = Buffer.alloc(32);
-    value.writeBigUInt64BE(BigInt(withdrawalData.value), 24);
-
-    const dataLength = Buffer.alloc(8);
-    dataLength.writeUInt32BE(withdrawalData.data.length);
+    withdrawalValueBuffer.copy(value, 32 - withdrawalValueBuffer.length);
 
     const data = Buffer.from(this.cleanHexPrefix(withdrawalData.data), "hex");
 
     const operation = Buffer.alloc(1);
-    operation.writeUInt8(withdrawalData.operation);
+    operation.writeUInt8(parseInt(this.cleanHexPrefix(withdrawalData.operation), 16));
 
+    let safeTxGasBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.safeTxGas), "hex").slice(-32);
     const safeTxGas = Buffer.alloc(32);
-    safeTxGas.writeBigUInt64BE(BigInt(withdrawalData.safeTxGas));
+    safeTxGasBuffer.copy(safeTxGas, 32 - safeTxGasBuffer.length);
 
+    let baseGasBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.baseGas), "hex").slice(-32);
     const baseGas = Buffer.alloc(32);
-    baseGas.writeBigUInt64BE(BigInt(withdrawalData.baseGas));
+    baseGasBuffer.copy(baseGas, 32 - baseGasBuffer.length);
 
+    let gasPriceBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.gasPrice), "hex").slice(-32);
     const gasPrice = Buffer.alloc(32);
-    gasPrice.writeBigUInt64BE(BigInt(withdrawalData.gasPrice));
+    gasPriceBuffer.copy(gasPrice, 32 - gasPriceBuffer.length);
 
-    const gasToken = Buffer.from(this.cleanHexPrefix(withdrawalData.gasToken.toString()), "hex").slice(-20);
-    
-    const refundReceiver = Buffer.from(this.cleanHexPrefix(withdrawalData.refundReceiver), "hex").slice(-20);
+    let gasTokenBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.gasToken), "hex").slice(-20);
+    const gasToken = Buffer.alloc(20);
+    gasTokenBuffer.copy(gasToken, 20 - gasTokenBuffer.length);
 
+    let refundReceiverBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.refundReceiver), "hex").slice(-20);
+    const refundReceiver = Buffer.alloc(20);
+    refundReceiverBuffer.copy(refundReceiver, 20 - refundReceiverBuffer.length);
+
+    let nonceBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.nonce), "hex").slice(-32);
     const nonce = Buffer.alloc(32);
-    nonce.writeBigUInt64BE(BigInt(withdrawalData.nonce), 24);
+    nonceBuffer.copy(nonce, 32 - nonceBuffer.length);
 
-    console.log("value", value.toString("hex"));
-
-    console.log("to", to.toString("hex").padStart(40, '0'), 
-              "\nvalue", value.toString("hex").padStart(64, '0'), 
-              "\ndataLength", dataLength.toString("hex").padStart(64, '0'), 
-              "\ndata", data.toString("hex"), 
-              "\noperation", operation.toString("hex").padStart(2, '0'), 
-              "\nsafeTxGas", safeTxGas.toString("hex").padStart(64, '0'), 
-              "\nbaseGas", baseGas.toString("hex").padStart(64, '0'), 
-              "\ngasPrice", gasPrice.toString("hex").padStart(64, '0'), 
-              "\ngasToken", gasToken.toString("hex").padStart(40, '0'), 
-              "\nrefundReceiver", refundReceiver.toString("hex").padStart(40, '0'), 
-              "\nnonce", nonce.toString("hex").padStart(64, '0'));
-
-    return Buffer.concat([to, value, dataLength, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce]);
+    return {
+      to,
+      value,
+      data,
+      operation,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken,
+      refundReceiver,
+      nonce
+    };
 }
 
   /**
@@ -371,18 +374,16 @@ export default class BtcNew {
    * the provided derivation path according to the Bitcoin Signature format
    * and returns v, r, s.
    */
-    async signWithdrawal({ path, messageHex, withdrawalData }: { path: string; messageHex: string; withdrawalData: AcreWithdrawalData }): Promise<{
+    async signWithdrawal({ path, withdrawalData }: { path: string; withdrawalData: AcreWithdrawalData }): Promise<{
       v: number;
       r: string;
       s: string;
     }> {
       const pathElements: number[] = pathStringToArray(path);
-      const message = Buffer.from(messageHex, "hex");
       const withdrawalDataBuffer = this.formatAcreWithdrawalData(withdrawalData);
-      console.log("withdrawalDataBuffer", withdrawalDataBuffer.toString("hex"));
+      console.log("withdrawalDataBuffer", withdrawalDataBuffer);
 
-      // To change after this point
-      const sig = await this.client.signWithdrawal(pathElements, message, withdrawalDataBuffer);
+      const sig = await this.client.signWithdrawal(pathElements, withdrawalDataBuffer);
       const buf = Buffer.from(sig, "base64");
   
       const v = buf.readUInt8() - 27 - 4;

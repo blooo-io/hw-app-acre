@@ -7,7 +7,7 @@ import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import {log } from "@ledgerhq/logs";
-import { AcreWithdrawalData } from "../types";
+import { AcreWithdrawalDataBuffer } from "../types";
 
 const CLA_BTC = 0xe1;
 const CLA_FRAMEWORK = 0xf8;
@@ -20,6 +20,7 @@ enum BitcoinIns {
   SIGN_PSBT = 0x04,
   GET_MASTER_FINGERPRINT = 0x05,
   SIGN_MESSAGE = 0x10,
+  SIGN_WITHDRAW = 0x11
 }
 
 enum FrameworkIns {
@@ -201,8 +202,7 @@ export class AppClient {
 
   async signWithdrawal(
     pathElements: number[],
-    message: Buffer,
-    withdrawalData: Buffer
+    withdrawalDataBuffer: AcreWithdrawalDataBuffer
   ): Promise<string> {
     if (pathElements.length > 6) {
       throw new Error("Path too long. At most 6 levels allowed.");
@@ -211,18 +211,41 @@ export class AppClient {
     const clientInterpreter = new ClientCommandInterpreter(() => {});
 
     // prepare ClientCommandInterpreter
-    const nChunks = Math.ceil(message.length / 64);
     const chunks: Buffer[] = [];
-    for (let i = 0; i < nChunks; i++) {
-      chunks.push(message.subarray(64 * i, 64 * i + 64));
+
+    // Chunk 0: to[20] + gasToken[20] + refundReceiver[20]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.to, withdrawalDataBuffer.gasToken, withdrawalDataBuffer.refundReceiver]));
+
+    // Chunk 1: value[32] + safeTxGas[32]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.value, withdrawalDataBuffer.safeTxGas]));
+
+    // Chunk 2: baseGas[32] + gasPrice[32]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.baseGas, withdrawalDataBuffer.gasPrice]));
+
+    // Chunk 3: nonce[32] + operation[1]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.nonce, withdrawalDataBuffer.operation]));
+    
+    // Chunk 4: data_selector[4] (the first 4 bytes of data)
+    chunks.push(withdrawalDataBuffer.data.slice(0, 4));
+
+    // Calculate the number of 64-byte chunks needed for the remaining data
+    const nChunksData = Math.ceil((withdrawalDataBuffer.data.length - 4) / 64);
+
+    // Chunk 5 to n: data[64]
+    for (let i=0; i<nChunksData; i++) {
+      chunks.push(withdrawalDataBuffer.data.slice(4 + 64*i, 4 + 64*(i+1)));
+    }
+
+    for(let i=0; i<chunks.length; i++) {
+      console.log("chunks[" + i + "]:", chunks[i].toString("hex"));
     }
 
     clientInterpreter.addKnownList(chunks);
     const chunksRoot = new Merkle(chunks.map(m => hashLeaf(m))).getRoot();
 
     const response = await this.makeRequest(
-      BitcoinIns.SIGN_MESSAGE,
-      Buffer.concat([pathElementsToBuffer(pathElements), createVarint(message.length), chunksRoot]),
+      BitcoinIns.SIGN_WITHDRAW,
+      Buffer.concat([pathElementsToBuffer(pathElements), createVarint(nChunksData + 5), chunksRoot]),
       clientInterpreter,
     );
 
