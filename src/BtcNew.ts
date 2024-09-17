@@ -314,8 +314,12 @@ export default class BtcNew {
     };
   }
   cleanHexPrefix(hexString: string): string {
-    return hexString.startsWith("0x") ? hexString.slice(2) : hexString;
-  }
+    let cleanedHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
+    if (cleanedHex.length % 2 !== 0) {
+        cleanedHex = '0' + cleanedHex;
+    }
+    return cleanedHex;
+}
 
   formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): AcreWithdrawalDataBuffer {
     console.log("withdrawalData", withdrawalData);
