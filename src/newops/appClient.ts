@@ -224,7 +224,7 @@ export class AppClient {
 
     // Chunk 3: nonce[32] + operation[1]
     chunks.push(Buffer.concat([withdrawalDataBuffer.nonce, withdrawalDataBuffer.operation]));
-    
+
     // Chunk 4: data_selector[4] (the first 4 bytes of data)
     chunks.push(withdrawalDataBuffer.data.slice(0, 4));
 
@@ -249,6 +249,6 @@ export class AppClient {
       clientInterpreter,
     );
 
-    return response.slice(0, 64).toString("hex");
+    return response.toString("base64")
   }
 }
