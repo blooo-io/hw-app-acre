@@ -4,7 +4,7 @@
 [Ledger Devs Discord](https://developers.ledger.com/discord-pro),
 [Developer Portal](https://developers.ledger.com/)
 
-## @ledgerhq/hw-app-btc
+## @blooo/hw-app-acre
 
 Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 
@@ -12,7 +12,7 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 
 ## Are you adding Ledger support to your software wallet?
 
-You may be using this package to communicate with the Bitcoin Nano App.
+You may be using this package to communicate with the Acre Nano App.
 
 For a smooth and quick integration:
 
@@ -64,55 +64,59 @@ For a smooth and quick integration:
         *   [Parameters](#parameters-12)
     *   [signMessage](#signmessage-1)
         *   [Parameters](#parameters-13)
+    *   [signWithdrawal](#signwithdrawal-1)
+        *   [Parameters](#parameters-14)
 *   [descrTemplFrom](#descrtemplfrom)
-    *   [Parameters](#parameters-14)
+    *   [Parameters](#parameters-15)
 *   [BtcOld](#btcold)
     *   [getWalletPublicKey](#getwalletpublickey-2)
-        *   [Parameters](#parameters-15)
+        *   [Parameters](#parameters-16)
         *   [Examples](#examples-7)
     *   [createPaymentTransaction](#createpaymenttransaction-2)
-        *   [Parameters](#parameters-16)
+        *   [Parameters](#parameters-17)
         *   [Examples](#examples-8)
 *   [CreateTransactionArg](#createtransactionarg)
     *   [Properties](#properties)
 *   [AddressFormat](#addressformat)
+*   [AcreWithdrawalData](#acrewithdrawaldata)
+    *   [Properties](#properties-1)
 *   [AccountType](#accounttype)
     *   [spendingCondition](#spendingcondition)
-        *   [Parameters](#parameters-17)
-    *   [setInput](#setinput)
         *   [Parameters](#parameters-18)
-    *   [setOwnOutput](#setownoutput)
+    *   [setInput](#setinput)
         *   [Parameters](#parameters-19)
+    *   [setOwnOutput](#setownoutput)
+        *   [Parameters](#parameters-20)
     *   [getDescriptorTemplate](#getdescriptortemplate)
 *   [SingleKeyAccount](#singlekeyaccount)
 *   [getTaprootOutputKey](#gettaprootoutputkey)
-    *   [Parameters](#parameters-20)
-*   [AppClient](#appclient)
     *   [Parameters](#parameters-21)
-*   [ClientCommandInterpreter](#clientcommandinterpreter)
+*   [AppClient](#appclient)
     *   [Parameters](#parameters-22)
-*   [MerkelizedPsbt](#merkelizedpsbt)
+*   [ClientCommandInterpreter](#clientcommandinterpreter)
     *   [Parameters](#parameters-23)
-*   [Merkle](#merkle)
+*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-24)
-*   [MerkleMap](#merklemap)
+*   [Merkle](#merkle)
     *   [Parameters](#parameters-25)
-*   [WalletPolicy](#walletpolicy)
+*   [MerkleMap](#merklemap)
     *   [Parameters](#parameters-26)
-*   [extract](#extract)
+*   [WalletPolicy](#walletpolicy)
     *   [Parameters](#parameters-27)
-*   [finalize](#finalize)
+*   [extract](#extract)
     *   [Parameters](#parameters-28)
-*   [clearFinalizedInput](#clearfinalizedinput)
+*   [finalize](#finalize)
     *   [Parameters](#parameters-29)
-*   [writePush](#writepush)
+*   [clearFinalizedInput](#clearfinalizedinput)
     *   [Parameters](#parameters-30)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-31)
 *   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-31)
+    *   [Parameters](#parameters-32)
     *   [Examples](#examples-9)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
-    *   [Properties](#properties-1)
+    *   [Properties](#properties-2)
 *   [TransactionInput](#transactioninput)
 *   [TransactionOutput](#transactionoutput)
 *   [Transaction](#transaction)
@@ -426,10 +430,25 @@ and returns v, r, s.
 
 ##### Parameters
 
-*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), messageHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}**&#x20;
+*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), withdrawalData: [AcreWithdrawalData](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}**&#x20;
 
     *   `$0.path` &#x20;
-    *   `$0.messageHex` &#x20;
+    *   `$0.withdrawalData` &#x20;
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
+
+#### signWithdrawal
+
+Signs an Acre Withdrawal message with the private key at
+the provided derivation path according to the Bitcoin Signature format
+and returns v, r, s.
+
+##### Parameters
+
+*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), withdrawalData: [AcreWithdrawalData](#acrewithdrawaldata)}**
+
+    *   `$0.path` &#x20;
+    *   `$0.withdrawalData` &#x20;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
 
@@ -534,6 +553,22 @@ Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referen
 *   `onDeviceStreaming` **function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?**&#x20;
 *   `onDeviceSignatureRequested` **function (): void?**&#x20;
 *   `onDeviceSignatureGranted` **function (): void?**&#x20;
+
+### AcreWithdrawalData
+
+The AcreWithdrawalData type contains the following properties related to a withdrawal transaction, where each property is a hexadecimal string.
+
+#### Properties
+* `to` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `value` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `data` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `operation` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `safeTxGas` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `baseGas` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `gasPrice` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `gasToken` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `refundReceiver` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
+* `nonce` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** (hexadecimal)
 
 ### AddressFormat
 

@@ -231,11 +231,6 @@ export class AppClient {
     // Calculate the number of 64-byte chunks needed for the remaining data
     const nChunksData = Math.ceil((withdrawalDataBuffer.data.length - 4) / 64);
 
-    // Chunk 5 to n: data[64]
-    for (let i=0; i<nChunksData; i++) {
-      chunks.push(withdrawalDataBuffer.data.slice(4 + 64*i, 4 + 64*(i+1)));
-    }
-
     for(let i=0; i<chunks.length; i++) {
       console.log("chunks[" + i + "]:", chunks[i].toString("hex"));
     }

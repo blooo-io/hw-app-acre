@@ -25,6 +25,7 @@ import {
   wrappedP2wpkhTwoInputs,
 } from "./testtx";
 import { AppClient } from "../../src/newops/appClient";
+import { AcreWithdrawalData } from '../../src/types';
 import { listen, log } from "@ledgerhq/logs";
 listen(log => console.log(log));
 
@@ -36,12 +37,6 @@ test("getWalletPublicKey p2wpkh", async () => {
   await testGetWalletPublicKey("m/84'/1'/0'", "wpkh(@0)");
   await testGetWalletPublicKey("m/84'/0'/17'", "wpkh(@0)");
 });
-test("testGetWalletPublicKeyRealClient p2wpkh", async () => {
-  await testGetWalletPublicKeyRealClient("m/84'/1'/0'", "wpkh(@0)");
-});
-test("testSignMessageRealClient", async () => {
-  await testSignMessageRealClient("m/84'/1'/0'");
-});
 test("getWalletPublicKey wrapped p2wpkh", async () => {
   await testGetWalletPublicKey("m/49'/1'/0'", "sh(wpkh(@0))");
   await testGetWalletPublicKey("m/49'/0'/17'", "sh(wpkh(@0))");
@@ -51,9 +46,19 @@ test("getWalletPublicKey p2tr", async () => {
   await testGetWalletPublicKey("m/86'/0'/17'", "tr(@0)");
 });
 
-test("signWithdrawalRealClient", async () => {
-  await testSignWithdrawalRealClient();
-}, 10 * 60 * 1000);
+test("getWalletXpub normal path", async () => {
+  await testGetWalletXpub("m/11'/12'");
+  await testGetWalletXpub("m/11");
+  await testGetWalletXpub("m/44'/0'/0'");
+});
+
+test("testSignMessage", async () => {
+  await testSignMessageReplayer("m/44'/0'/0'");
+});
+
+test("signWithdrawal", async () => {
+  await testSignWithdrawalReplayer();
+});
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   const basePath = `m/${type}/1'/0'/`;
@@ -177,63 +182,11 @@ async function testGetWalletPublicKey(
   verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
 }
 
-async function testGetWalletPublicKeyRealClient(
-  accountPath: string,
-  expectedDescriptorTemplate: DefaultDescriptorTemplate,
-) {
-  const transport = await openTransportReplayer(RecordStore.fromString(`
-    => e10000001600058000005480000001800000000000000000000000
-    <= 74707562444742337234346d37666a654c36676a6b75456e6e5a6e586677646e7a71524b6b713961636576354d464755653631766179326e6e3270427a56654e546d613563745733415746524a644c65707a737a35503332676a4d426268687837684b6434664a4d587361635a364c9000
-    => e10000000e0003800000548000000180000000
-    <= 747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431509000
-    => e105000000
-    <= f5acc2fd9000
-    => e10300004600893198490079bb0667594bfa902274b1cd28d7ed9df140121dc69021bead679f00000000000000000000000000000000000000000000000000000000000000000000000000
-    <= 4000893198490079bb0667594bfa902274b1cd28d7ed9df140121dc69021bead679fe000
-    => f80100002e2c2c01000877706b682840302901ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340
-    <= 41ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400100e000
-    => f801000022ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400000
-    <= 4000ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340e000
-    => f8010000898787005b66356163633266642f3834272f31272f30275d747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431502f2a2a
-    <= 41ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400100e000
-    => f801000022ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe3400000
-    <= 4000ac0efe99ff9d292d0e7bd2eab1b24480f963c52afe2e655d966827d3efbbe340e000
-    => f8010000898787005b66356163633266642f3834272f31272f30275d747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431502f2a2a
-    <= 746231717a647237733273723064776d6b777830333372346e756a7a6b38367530637936666d7a666a6b9000
-    => e10000000e0003800000548000000180000000
-    <= 747075624443744b66734e795268554c6a5a39584d5334564b4b7456635064564469384d4b5562635344394d4a44796a52753141324e44354d6969706f7a797973704254396267387570457037613845416746784e78586e316437516b64624c35325479356a69534c6378507431509000
-    `));
-  const client = new AppClient(transport);
-  const path = accountPath + "/0/0";
-  // const accountXpub =
-  //   "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
-  // const keyXpub =
-  //   "tpubDHcN44A4UHqdHJZwBxgTbu8Cy87ZrZkN8tQnmJGhcijHqe4rztuvGcD4wo36XSviLmiqL5fUbDnekYaQ7LzAnaqauBb9RsyahsTTFHdeJGd";
-  // client.getPubkeyResponse(accountPath, accountXpub);
-  // client.mockGetPubkeyResponse(path, keyXpub);
-  // const key = `[${masterFingerprint.toString("hex")}${accountPath.substring(1)}]${accountXpub}/**`;
-  // client.mockGetWalletAddressResponse(
-  //   new WalletPolicy(expectedDescriptorTemplate, key),
-  //   0,
-  //   0,
-  //   "testaddress",
-  // );
-
-  const btcNew = new BtcNew(client);
-  const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
-  const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
-  log('address', result.bitcoinAddress)
-  // verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
-  const resultAccount = await btcNew.getWalletPublicKey(accountPath);
-  // verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
-}
-
-async function testSignMessageRealClient(
+async function testSignMessageReplayer(
   accountPath: string,
 ) {
-  // try createTransportRecorder
   const transport = await openTransportReplayer(RecordStore.fromString(`
-    => e11000003605800000548000000180000000000000000000000004dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e
+    => e110000036058000002c8000000080000000000000000000000004dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e
     <= 41dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0100e000
     => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
     <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
@@ -242,19 +195,24 @@ async function testSignMessageRealClient(
     => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
     <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
     => f80100000705050074657374
-    <= 1f32af834dbf7e64f730a1fb76d1970cb66517222bfb017f46a75f91cc1fa216b76fd35df48d28b9c2c4b994e7799608cc1353ae810d1049a8ab8af047e16a1a999000
+    <= 1fdf44ce2f8f6f62fec9b0d01bd66bc91aa73984e0cf02ad8ff7bf12f8013ba7796d8ed4d795a542509ec7f63539ec6521a3d61a29e4cf9c6d9a386b06b32f224b9000
     `));
   const client = new AppClient(transport);
   const path = accountPath + "/0/0";
 
   const btcNew = new BtcNew(client);
   const result = await btcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
-  console.log('v,r,s: ', result)
+  expect(result).toEqual({
+    v: 0,
+    r: 'df44ce2f8f6f62fec9b0d01bd66bc91aa73984e0cf02ad8ff7bf12f8013ba779',
+    s: '6d8ed4d795a542509ec7f63539ec6521a3d61a29e4cf9c6d9a386b06b32f224b'
+  })
+
 }
 
-async function testSignWithdrawalRealClient() {
+async function testSignWithdrawalReplayer() {
   
-  const transport = new SpeculosTransport("http://localhost:5000")
+  const [client, transport] = await createClient();
 
   const withdrawalData: AcreWithdrawalData = {
     to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
@@ -268,7 +226,6 @@ async function testSignWithdrawalRealClient() {
     refundReceiver: "0x0000000000000000000000000000000000000000",
     nonce: "0xC",
   };
-  const client = new AppClient(transport);
   const path = "m/44'/0'/0'/0/0";
 
   const btcNew = new BtcNew(client);
