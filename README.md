@@ -6,7 +6,7 @@
 
 ## @blooo/hw-app-acre
 
-Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
+Ledger Hardware Wallet Acre JavaScript bindings. Also supports many altcoins.
 
 ***
 
@@ -143,7 +143,7 @@ Bitcoin API.
 #### Examples
 
 ```javascript
-import Btc from "@ledgerhq/hw-app-btc";
+import Btc from "@blooo/hw-app-acre:";
 const btc = new Btc({ transport, currency: "bitcoin" });
 ```
 
