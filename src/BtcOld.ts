@@ -8,6 +8,7 @@ import type { AddressFormat } from "./getWalletPublicKey";
 import { getWalletPublicKey } from "./getWalletPublicKey";
 import { pathArrayToString, pathStringToArray } from "./bip32";
 import { signMessage } from "./signMessage";
+import { AcreWithdrawalData } from "./types";
 export type { AddressFormat };
 
 /**
@@ -131,7 +132,7 @@ export default class BtcOld {
   createPaymentTransaction(arg: CreateTransactionArg): Promise<string> {
     if (arguments.length > 1) {
       throw new Error(
-        "@ledgerhq/hw-app-btc: createPaymentTransaction multi argument signature is deprecated. please switch to named parameters.",
+        "@blooo/hw-app-acre: createPaymentTransaction multi argument signature is deprecated. please switch to named parameters.",
       );
     }
     return createTransaction(this.transport, arg);
@@ -146,6 +147,20 @@ export default class BtcOld {
       path,
       messageHex,
     });
+  }
+
+ /**
+  * This function will never be called from a BtcOld context, it is only delcared here for compatibility with
+  * the current framework, throwing an error in case it is ever reached.
+  */
+  async signWithdrawal({ path, withdrawalData }: { path: string; withdrawalData: AcreWithdrawalData }): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    throw new Error(
+      "@blooo/hw-app-acre: Acre Withdrawal transaction is not compatible with the legacy BtcOld client. Please use the BtcNew client",
+    );
   }
 }
 
