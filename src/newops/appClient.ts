@@ -29,7 +29,7 @@ enum FrameworkIns {
 
 /**
  * This class encapsulates the APDU protocol documented at
- * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
+ * https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md
  */
 export class AppClient {
   transport: Transport;

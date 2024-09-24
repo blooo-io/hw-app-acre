@@ -11,7 +11,7 @@ export type DefaultDescriptorTemplate = "pkh(@0)" | "sh(wpkh(@0))" | "wpkh(@0)" 
  * of a "Descriptor Template" and a list of "keys". A key is basically
  * a serialized BIP32 extended public key with some added derivation path
  * information. This is documented at
- * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/wallet.md
+ * https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md
  */
 export class WalletPolicy {
   descriptorTemplate: string;
