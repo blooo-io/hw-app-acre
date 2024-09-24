@@ -7,6 +7,7 @@ import BtcNew from "../../src/BtcNew";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { splitTransaction } from "../../src/splitTransaction";
+import { withdrawalAPDUs, signMessageAPDUs } from "./apdus";
 import {
   StandardPurpose,
   addressFormatFromDescriptorTemplate,
@@ -83,9 +84,9 @@ test("Sign p2wpkh wrapped", async () => {
   changePubkey = "031175a985c56e310ce3496a819229b427a2172920fd20b5972dda62758c6def09";
   await runSignTransactionTest(wrappedP2wpkhTwoInputs, StandardPurpose.p2wpkhInP2sh, changePubkey);
 });
-    test("Sign p2wpkh", async () => {
-      await runSignTransactionTest(p2wpkh, StandardPurpose.p2wpkh);
-    });
+test("Sign p2wpkh", async () => {
+  await runSignTransactionTest(p2wpkh, StandardPurpose.p2wpkh);
+});
 test("Sign p2tr", async () => {
   // This tx uses locktime, so this test verifies that locktime is propagated to/from
   // the psbt correctly.
@@ -185,18 +186,7 @@ async function testGetWalletPublicKey(
 async function testSignMessageReplayer(
   accountPath: string,
 ) {
-  const transport = await openTransportReplayer(RecordStore.fromString(`
-    => e110000036058000002c8000000080000000000000000000000004dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e
-    <= 41dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0100e000
-    => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
-    <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
-    => f80100000705050074657374
-    <= 41dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0100e000
-    => f801000022dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058e0000
-    <= 4000dbebd10e61bc8c28591273feafbbef95d544f874693301d8f7f8e54c6e30058ee000
-    => f80100000705050074657374
-    <= 1fdf44ce2f8f6f62fec9b0d01bd66bc91aa73984e0cf02ad8ff7bf12f8013ba7796d8ed4d795a542509ec7f63539ec6521a3d61a29e4cf9c6d9a386b06b32f224b9000
-    `));
+  const transport = await openTransportReplayer(RecordStore.fromString(signMessageAPDUs));
   const client = new AppClient(transport);
   const path = accountPath + "/0/0";
 
@@ -211,13 +201,14 @@ async function testSignMessageReplayer(
 }
 
 async function testSignWithdrawalReplayer() {
-  
-  const [client, transport] = await createClient();
+
+  const transport = await openTransportReplayer(RecordStore.fromString(withdrawalAPDUs));
+  const client = new AppClient(transport);
 
   const withdrawalData: AcreWithdrawalData = {
     to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
     value: "0x0",
-    data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a9143c6480044cfafde6dad7f718f76938cc87d0679a88ac000000000000",
+    data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a914c8e9edf5e915c0482b1b236fc917011a4b943e6e88ac000000000000",
     operation: "0",
     safeTxGas: "0x0",
     baseGas: "0x0",
@@ -230,7 +221,11 @@ async function testSignWithdrawalReplayer() {
 
   const btcNew = new BtcNew(client);
   const result = await btcNew.signWithdrawal({path: path, withdrawalData: withdrawalData});
-  console.log('signed withdrawal:', result);
+  expect(result).toEqual({
+    v: 0,
+    r: '88c6c773f8d3101e30bbcc7811f8b553d222265023b981ad2f12dfa0da8ae8c2',
+    s: '3f718ebdfc1990b5baa0a908ae9b093c6719fd7251d7cb5c75355cb9196b6410',
+  });
 }
 
 function verifyGetWalletPublicKeyResult(
