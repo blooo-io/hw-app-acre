@@ -6,6 +6,8 @@ import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
+import {log } from "@ledgerhq/logs";
+import { AcreWithdrawalDataBuffer } from "../types";
 
 const CLA_BTC = 0xe1;
 const CLA_FRAMEWORK = 0xf8;
@@ -18,6 +20,7 @@ enum BitcoinIns {
   SIGN_PSBT = 0x04,
   GET_MASTER_FINGERPRINT = 0x05,
   SIGN_MESSAGE = 0x10,
+  SIGN_WITHDRAW = 0x11
 }
 
 enum FrameworkIns {
@@ -26,7 +29,7 @@ enum FrameworkIns {
 
 /**
  * This class encapsulates the APDU protocol documented at
- * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
+ * https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md
  */
 export class AppClient {
   transport: Transport;
@@ -195,5 +198,53 @@ export class AppClient {
     );
 
     return response.toString("base64");
+  }
+
+  async signWithdrawal(
+    pathElements: number[],
+    withdrawalDataBuffer: AcreWithdrawalDataBuffer
+  ): Promise<string> {
+    if (pathElements.length > 6) {
+      throw new Error("Path too long. At most 6 levels allowed.");
+    }
+
+    const clientInterpreter = new ClientCommandInterpreter(() => {});
+
+    // prepare ClientCommandInterpreter
+    const chunks: Buffer[] = [];
+
+    // Chunk 0: to[20] + gasToken[20] + refundReceiver[20]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.to, withdrawalDataBuffer.gasToken, withdrawalDataBuffer.refundReceiver]));
+
+    // Chunk 1: value[32] + safeTxGas[32]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.value, withdrawalDataBuffer.safeTxGas]));
+
+    // Chunk 2: baseGas[32] + gasPrice[32]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.baseGas, withdrawalDataBuffer.gasPrice]));
+
+    // Chunk 3: nonce[32] + operation[1]
+    chunks.push(Buffer.concat([withdrawalDataBuffer.nonce, withdrawalDataBuffer.operation]));
+
+    // Chunk 4: data_selector[4] (the first 4 bytes of data)
+    chunks.push(withdrawalDataBuffer.data.slice(0, 4));
+
+    // Calculate the number of 64-byte chunks needed for the remaining data
+    const nChunksData = Math.ceil((withdrawalDataBuffer.data.length - 4) / 64);
+
+        // Chunk 5 to n: data[64]
+    for (let i=0; i<nChunksData; i++) {
+      chunks.push(withdrawalDataBuffer.data.slice(4 + 64*i, 4 + 64*(i+1)));
+    }
+
+    clientInterpreter.addKnownList(chunks);
+    const chunksRoot = new Merkle(chunks.map(m => hashLeaf(m))).getRoot();
+
+    const response = await this.makeRequest(
+      BitcoinIns.SIGN_WITHDRAW,
+      Buffer.concat([pathElementsToBuffer(pathElements), createVarint(nChunksData + 5), chunksRoot]),
+      clientInterpreter,
+    );
+
+    return response.toString("base64")
   }
 }

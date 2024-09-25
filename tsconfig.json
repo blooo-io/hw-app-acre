@@ -1,7 +1,26 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "lib"
+    "allowJs": true, // we might want to change to false
+    "allowSyntheticDefaultImports": true,
+    "outDir": "lib",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "pretty": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "sourceRoot": "./src",
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "downlevelIteration": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "module": "commonjs",
+    "lib": ["DOM", "ES2017"],
+    "isolatedModules": false,
+    "target": "ES6"
   },
   "include": ["src/**/*"]
 }

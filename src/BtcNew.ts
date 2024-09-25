@@ -24,7 +24,8 @@ import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
-import type { Transaction } from "./types";
+import type { Transaction, AcreWithdrawalData, AcreWithdrawalDataBuffer } from "./types";
+import { log } from "@ledgerhq/logs";
 
 /**
  * @class BtcNew
@@ -312,6 +313,93 @@ export default class BtcNew {
       s,
     };
   }
+  cleanHexPrefix(hexString: string): string {
+    let cleanedHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
+    if (cleanedHex.length % 2 !== 0) {
+        cleanedHex = '0' + cleanedHex;
+    }
+    return cleanedHex;
+}
+
+  formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): AcreWithdrawalDataBuffer {
+    console.log("withdrawalData", withdrawalData);
+    console.log("dataLength", withdrawalData.data.length);
+    const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to.toString()), "hex").slice(-20);
+
+    let withdrawalValueBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.value), "hex").slice(-32);
+    const value = Buffer.alloc(32);
+    withdrawalValueBuffer.copy(value, 32 - withdrawalValueBuffer.length);
+
+    const data = Buffer.from(this.cleanHexPrefix(withdrawalData.data), "hex");
+
+    const operation = Buffer.alloc(1);
+    operation.writeUInt8(parseInt(this.cleanHexPrefix(withdrawalData.operation), 16));
+
+    let safeTxGasBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.safeTxGas), "hex").slice(-32);
+    const safeTxGas = Buffer.alloc(32);
+    safeTxGasBuffer.copy(safeTxGas, 32 - safeTxGasBuffer.length);
+
+    let baseGasBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.baseGas), "hex").slice(-32);
+    const baseGas = Buffer.alloc(32);
+    baseGasBuffer.copy(baseGas, 32 - baseGasBuffer.length);
+
+    let gasPriceBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.gasPrice), "hex").slice(-32);
+    const gasPrice = Buffer.alloc(32);
+    gasPriceBuffer.copy(gasPrice, 32 - gasPriceBuffer.length);
+
+    let gasTokenBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.gasToken), "hex").slice(-20);
+    const gasToken = Buffer.alloc(20);
+    gasTokenBuffer.copy(gasToken, 20 - gasTokenBuffer.length);
+
+    let refundReceiverBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.refundReceiver), "hex").slice(-20);
+    const refundReceiver = Buffer.alloc(20);
+    refundReceiverBuffer.copy(refundReceiver, 20 - refundReceiverBuffer.length);
+
+    let nonceBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.nonce), "hex").slice(-32);
+    const nonce = Buffer.alloc(32);
+    nonceBuffer.copy(nonce, 32 - nonceBuffer.length);
+
+    return {
+      to,
+      value,
+      data,
+      operation,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken,
+      refundReceiver,
+      nonce
+    };
+}
+
+  /**
+   * Signs an Acre Withdrawal message with the private key at
+   * the provided derivation path according to the Bitcoin Signature format
+   * and returns v, r, s.
+   */
+    async signWithdrawal({ path, withdrawalData }: { path: string; withdrawalData: AcreWithdrawalData }): Promise<{
+      v: number;
+      r: string;
+      s: string;
+    }> {
+      const pathElements: number[] = pathStringToArray(path);
+      const withdrawalDataBuffer = this.formatAcreWithdrawalData(withdrawalData);
+      console.log("withdrawalDataBuffer", withdrawalDataBuffer);
+
+      const sig = await this.client.signWithdrawal(pathElements, withdrawalDataBuffer);
+      const buf = Buffer.from(sig, "base64");
+  
+      const v = buf.readUInt8() - 27 - 4;
+      const r = buf.slice(1, 33).toString("hex");
+      const s = buf.slice(33, 65).toString("hex");
+  
+      return {
+        v,
+        r,
+        s,
+      };
+    }
 
   /**
    * Calculates an output script along with public key and possible redeemScript

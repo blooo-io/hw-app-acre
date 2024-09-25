@@ -7,6 +7,7 @@ import BtcNew from "../../src/BtcNew";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { splitTransaction } from "../../src/splitTransaction";
+import { withdrawalAPDUs, signMessageAPDUs } from "./apdus";
 import {
   StandardPurpose,
   addressFormatFromDescriptorTemplate,
@@ -24,6 +25,10 @@ import {
   wrappedP2wpkh,
   wrappedP2wpkhTwoInputs,
 } from "./testtx";
+import { AppClient } from "../../src/newops/appClient";
+import { AcreWithdrawalData } from '../../src/types';
+import { listen, log } from "@ledgerhq/logs";
+listen(log => console.log(log));
 
 test("getWalletPublicKey p2pkh", async () => {
   await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
@@ -46,6 +51,14 @@ test("getWalletXpub normal path", async () => {
   await testGetWalletXpub("m/11'/12'");
   await testGetWalletXpub("m/11");
   await testGetWalletXpub("m/44'/0'/0'");
+});
+
+test("testSignMessage", async () => {
+  await testSignMessageReplayer("m/44'/0'/0'");
+});
+
+test("signWithdrawal", async () => {
+  await testSignWithdrawalReplayer();
 });
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
@@ -144,7 +157,7 @@ async function testGetWalletPublicKey(
   accountPath: string,
   expectedDescriptorTemplate: DefaultDescriptorTemplate,
 ) {
-  const [client] = await createClient();
+  const [client, transport] = await createClient();
   const path = accountPath + "/0/0";
   const accountXpub =
     "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
@@ -163,10 +176,56 @@ async function testGetWalletPublicKey(
   const btcNew = new BtcNew(client);
   const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
   const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
+  log('address', result.bitcoinAddress)
   verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
-
+  console.log('notworkingforsure')
   const resultAccount = await btcNew.getWalletPublicKey(accountPath);
   verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
+}
+
+async function testSignMessageReplayer(
+  accountPath: string,
+) {
+  const transport = await openTransportReplayer(RecordStore.fromString(signMessageAPDUs));
+  const client = new AppClient(transport);
+  const path = accountPath + "/0/0";
+
+  const btcNew = new BtcNew(client);
+  const result = await btcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
+  expect(result).toEqual({
+    v: 0,
+    r: 'df44ce2f8f6f62fec9b0d01bd66bc91aa73984e0cf02ad8ff7bf12f8013ba779',
+    s: '6d8ed4d795a542509ec7f63539ec6521a3d61a29e4cf9c6d9a386b06b32f224b'
+  })
+
+}
+
+async function testSignWithdrawalReplayer() {
+
+  const transport = await openTransportReplayer(RecordStore.fromString(withdrawalAPDUs));
+  const client = new AppClient(transport);
+
+  const withdrawalData: AcreWithdrawalData = {
+    to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
+    value: "0x0",
+    data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a914c8e9edf5e915c0482b1b236fc917011a4b943e6e88ac000000000000",
+    operation: "0",
+    safeTxGas: "0x0",
+    baseGas: "0x0",
+    gasPrice: "0x0",
+    gasToken: "0x0000000000000000000000000000000000000000",
+    refundReceiver: "0x0000000000000000000000000000000000000000",
+    nonce: "0xC",
+  };
+  const path = "m/44'/0'/0'/0/0";
+
+  const btcNew = new BtcNew(client);
+  const result = await btcNew.signWithdrawal({path: path, withdrawalData: withdrawalData});
+  expect(result).toEqual({
+    v: 0,
+    r: '88c6c773f8d3101e30bbcc7811f8b553d222265023b981ad2f12dfa0da8ae8c2',
+    s: '3f718ebdfc1990b5baa0a908ae9b093c6719fd7251d7cb5c75355cb9196b6410',
+  });
 }
 
 function verifyGetWalletPublicKeyResult(

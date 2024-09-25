@@ -10,7 +10,7 @@ import { AppClient } from "./newops/appClient";
 import { serializeTransactionOutputs } from "./serializeTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { splitTransaction } from "./splitTransaction";
-import type { Transaction } from "./types";
+import type { AcreWithdrawalData, Transaction } from "./types";
 export type { AddressFormat };
 import { signP2SHTransaction } from "./signP2SHTransaction";
 import { checkIsBtcLegacy, getAppAndVersion } from "./getAppAndVersion";
@@ -22,7 +22,7 @@ import { checkIsBtcLegacy, getAppAndVersion } from "./getAppAndVersion";
  * @param scrambleKey This parameter is deprecated and no longer needed.
  * @param currency The currency to use, defaults to "bitcoin".
  * @example
- * import Btc from "@ledgerhq/hw-app-btc";
+ * import Btc from "@blooo/hw-app-acre:";
  * const btc = new Btc({ transport, currency: "bitcoin" });
  */
 
@@ -164,6 +164,40 @@ export default class Btc {
   }
 
   /**
+   * Signs an Acre Withdrawal message with the private key at the provided derivation path according to the Bitcoin Signature format and returns v, r, s.
+   * @example
+      const withdrawalData: AcreWithdrawalData = {
+        to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
+        value: "0x0",
+        data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a914c8e9edf5e915c0482b1b236fc917011a4b943e6e88ac000000000000",
+        operation: "0",
+        safeTxGas: "0x0",
+        baseGas: "0x0",
+        gasPrice: "0x0",
+        gasToken: "0x0000000000000000000000000000000000000000",
+        refundReceiver: "0x0000000000000000000000000000000000000000",
+        nonce: "0xC",
+      };
+      const path = "m/44'/0'/0'/0/0";
+      const result = await btc.signWithdrawal({path: path, withdrawalData: withdrawalData});
+   */
+   signWithdrawal(
+    path: string,
+    withdrawalData: AcreWithdrawalData,
+  ): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    return this.changeImplIfNecessary().then(impl => {
+      return impl.signWithdrawal({
+        path,
+        withdrawalData,
+      });
+    });
+  }
+
+  /**
    * To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
    * @param inputs is an array of [ transaction, output_index, optional redeem script, optional sequence ] where
    *
@@ -200,7 +234,7 @@ export default class Btc {
   createPaymentTransaction(arg: CreateTransactionArg): Promise<string> {
     if (arguments.length > 1) {
       throw new Error(
-        "@ledgerhq/hw-app-btc: createPaymentTransaction multi argument signature is deprecated. please switch to named parameters.",
+        "@blooo/hw-app-acre:: createPaymentTransaction multi argument signature is deprecated. please switch to named parameters.",
       );
     }
     return this.changeImplIfNecessary().then(impl => {
@@ -292,6 +326,10 @@ export default class Btc {
 
     const isBtcLegacy = await (async () => {
       switch (name) {
+        case "Acre":
+        case "Acre Test":
+          // we never use the legacy protocol for Acre
+          return false;
         case "Bitcoin":
         case "Bitcoin Test": {
           // we use the legacy protocol for versions below 2.1.0 of the Bitcoin app.

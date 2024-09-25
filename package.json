@@ -1,24 +1,25 @@
 {
-  "name": "@ledgerhq/hw-app-btc",
-  "version": "10.4.1",
-  "description": "Ledger Hardware Wallet Bitcoin Application API",
+  "name": "@blooo/hw-app-acre",
+  "version": "1.0.0",
+  "description": "Ledger Hardware Wallet Acre Application API",
   "keywords": [
     "Ledger",
     "LedgerWallet",
     "btc",
     "Bitcoin",
+    "Acre",
     "NanoS",
     "Blue",
     "Hardware Wallet"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/LedgerHQ/ledger-live.git"
+    "url": "https://github.com/blooo-io/hw-app-acre.git"
   },
   "bugs": {
-    "url": "https://github.com/LedgerHQ/ledger-live/issues"
+    "url": "https://github.com/blooo-io/hw-app-acre/issues"
   },
-  "homepage": "https://github.com/LedgerHQ/ledger-live/tree/develop/libs/ledgerjs/packages/hw-app-btc",
+  "homepage": "https://github.com/blooo-io/hw-app-acre",
   "publishConfig": {
     "access": "public"
   },
@@ -71,6 +72,7 @@
     "semver": "^7.3.5",
     "sha.js": "2",
     "tiny-secp256k1": "1.1.6",
+    "typescript": "^5.5.4",
     "varuint-bitcoin": "1.1.2"
   },
   "devDependencies": {
