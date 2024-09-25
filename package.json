@@ -61,8 +61,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "workspace:^",
-    "@ledgerhq/logs": "workspace:^",
+    "@ledgerhq/hw-transport": "6.31.3",
+    "@ledgerhq/logs": "6.12.0",
     "bip32-path": "^0.4.2",
     "bitcoinjs-lib": "^5.2.0",
     "bs58": "^4.0.1",
@@ -76,8 +76,8 @@
     "varuint-bitcoin": "1.1.2"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-mocker": "workspace:^",
-    "@ledgerhq/hw-transport-node-speculos": "workspace:^",
+    "@ledgerhq/hw-transport-mocker": "6.29.3",
+    "@ledgerhq/hw-transport-node-speculos": "6.29.3",
     "@types/jest": "^29.5.10",
     "@types/node": "^20.8.10",
     "axios": "^0.25.0",
