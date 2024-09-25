@@ -3,7 +3,7 @@ import Transport from "@ledgerhq/hw-transport";
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos";
 import { getXpubComponents } from "../src/bip32";
 import Acre from "../src/Acre";
-import BtcNew from "../src/BtcNew";
+import AcreBtcNew from "../src/AcreBtcNew";
 import { compressPublicKey } from "../src/compressPublicKey";
 import { AppClient } from "../src/newops/appClient";
 import { runSignTransaction, TestingClient } from "./newops/integrationtools";
@@ -38,10 +38,10 @@ const xpubs = {
 // async function listAddresses(paths: string[], addressFormat: AddressFormat) {
 //   const tr = await transport();
 //   const client = new AppClient(tr);
-//   const btc = new BtcNew(client);
+//   const acre = new AcreBtcNew(client);
 //   let result = "";
 //   for (let i = 0; i < paths.length; i++) {
-//     const addr = await btc.getWalletPublicKey(paths[i], {
+//     const addr = await acre.getWalletPublicKey(paths[i], {
 //       format: addressFormat,
 //     });
 //     result += paths[i] + ": " + addr.bitcoinAddress + "\n";
@@ -140,11 +140,7 @@ function checkIgnoreWitness(testTx: CoreTx, actualTx: string) {
   expect(actBaseTx).toEqual(expBaseTx);
 }
 
-test("getWalletPublicKey BtcOld", async () => {
-  await runGetWalletPublicKey("old");
-});
-
-test("getWalletPublicKey BtcNew", async () => {
+test("getWalletPublicKey AcreBtcNew", async () => {
   await runGetWalletPublicKey("new");
 });
 
@@ -155,13 +151,13 @@ async function transport(): Promise<SpeculosTransport> {
 async function impl(
   variant: "old" | "new",
   transport: Transport
-): Promise<Acre | BtcNew> {
+): Promise<Acre | AcreBtcNew> {
   if (variant === "old") {
     return new Acre(transport);
   }
   const client = new AppClient(transport);
-  const btc = new BtcNew(client);
-  return btc;
+  const acre = new AcreBtcNew(client);
+  return acre;
 }
 
 async function runGetWalletPublicKey(variant: "old" | "new") {
@@ -173,9 +169,9 @@ async function runGetWalletPublicKey(variant: "old" | "new") {
     return;
   }
   try {
-    const btc = await impl(variant, tr);
+    const acre = await impl(variant, tr);
 
-    const account = await btc.getWalletPublicKey("m/44'/1'/0'");
+    const account = await acre.getWalletPublicKey("m/44'/1'/0'");
     const expectedAccount = getXpubComponents(xpubs["m/44'/1'/0'"]);
 
     const uncompressesPubkey =
@@ -189,7 +185,7 @@ async function runGetWalletPublicKey(variant: "old" | "new") {
     );
     expect(account.publicKey).toEqual(uncompressesPubkey);
 
-    const keydata = await btc.getWalletPublicKey("m/44'/1'/0'/0/0");
+    const keydata = await acre.getWalletPublicKey("m/44'/1'/0'/0/0");
     expect(keydata.bitcoinAddress).toEqual(
       "mz5vLWdM1wHVGSmXUkhKVvZbJ2g4epMXSm"
     );

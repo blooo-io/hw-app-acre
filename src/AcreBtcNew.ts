@@ -28,21 +28,21 @@ import type { Transaction, AcreWithdrawalData, AcreWithdrawalDataBuffer } from "
 import { log } from "@ledgerhq/logs";
 
 /**
- * @class BtcNew
- * @description This class implements the same interface as BtcOld (formerly
+ * @class AcreBtcNew
+ * @description This class implements the same interface as AcreBtcOld (formerly
  * named Btc), but interacts with Bitcoin hardware app version 2.1.0+
  * which uses a totally new APDU protocol. This new
  * protocol is documented at
  * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
  *
- * Since the interface must remain compatible with BtcOld, the methods
+ * Since the interface must remain compatible with AcreBtcOld, the methods
  * of this class are quite clunky, because it needs to adapt legacy
  * input data into the PSBT process. In the future, a new interface should
  * be developed that exposes PSBT to the outer world, which would render
  * a much cleaner implementation.
  *
  */
-export default class BtcNew {
+export default class AcreBtcNew {
   constructor(private client: Client) {}
 
   /**
@@ -559,7 +559,7 @@ function accountTypeFromArg(
   Useful resource on derivation paths: https://learnmeabitcoin.com/technical/derivation-paths
 */
 
-//path is not deepest hardened node of a standard path or deeper, use BtcOld
+//path is not deepest hardened node of a standard path or deeper, use AcreBtcOld
 const H = 0x80000000; //HARDENED from bip32
 
 const VALID_COIN_TYPES = [

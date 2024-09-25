@@ -5,7 +5,7 @@ export default {
   collectCoverage: true,
   testPathIgnorePatterns: ["packages/*/lib-es", "packages/*/lib"],
   coveragePathIgnorePatterns: ["packages/create-dapp"],
-  testMatch: ["**/tests/newops/BtcNew.test.ts"],
+  testMatch: ["**/tests/newops/AcreBtcNew.test.ts"],
   passWithNoTests: true,
   // collectCoverageFrom: ["packages/**/src/*.ts"],
   rootDir: __dirname,

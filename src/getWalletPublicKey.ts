@@ -30,7 +30,7 @@ export async function getWalletPublicKey(
   };
 
   if (!(format in addressFormatMap)) {
-    throw new Error("btc.getWalletPublicKey invalid format=" + format);
+    throw new Error("acre.getWalletPublicKey invalid format=" + format);
   }
 
   const buffer = bip32asBuffer(path);
