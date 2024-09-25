@@ -55,25 +55,27 @@ For a smooth and quick integration:
         *   [Parameters](#parameters-8)
     *   [getTrustedInputBIP143](#gettrustedinputbip143)
         *   [Parameters](#parameters-9)
+    *   [signWithdrawal](#signwithdrawal)
+        *   [Parameters](#parameters-10)
 *   [AcreBtcNew](#acrebtcnew)
     *   [getWalletXpub](#getwalletxpub-1)
-        *   [Parameters](#parameters-10)
-    *   [getWalletPublicKey](#getwalletpublickey-1)
         *   [Parameters](#parameters-11)
-    *   [createPaymentTransaction](#createpaymenttransaction-1)
+    *   [getWalletPublicKey](#getwalletpublickey-1)
         *   [Parameters](#parameters-12)
-    *   [signMessage](#signmessage-1)
+    *   [createPaymentTransaction](#createpaymenttransaction-1)
         *   [Parameters](#parameters-13)
-    *   [signWithdrawal](#signwithdrawal-1)
+    *   [signMessage](#signmessage-1)
         *   [Parameters](#parameters-14)
+    *   [signWithdrawal](#signwithdrawal-1)
+        *   [Parameters](#parameters-15)
 *   [descrTemplFrom](#descrtemplfrom)
-    *   [Parameters](#parameters-15)
+    *   [Parameters](#parameters-16)
 *   [AcreBtcOld](#acrebtcold)
     *   [getWalletPublicKey](#getwalletpublickey-2)
-        *   [Parameters](#parameters-16)
+        *   [Parameters](#parameters-17)
         *   [Examples](#examples-7)
     *   [createPaymentTransaction](#createpaymenttransaction-2)
-        *   [Parameters](#parameters-17)
+        *   [Parameters](#parameters-18)
         *   [Examples](#examples-8)
 *   [CreateTransactionArg](#createtransactionarg)
     *   [Properties](#properties)
@@ -82,38 +84,38 @@ For a smooth and quick integration:
     *   [Properties](#properties-1)
 *   [AccountType](#accounttype)
     *   [spendingCondition](#spendingcondition)
-        *   [Parameters](#parameters-18)
-    *   [setInput](#setinput)
         *   [Parameters](#parameters-19)
-    *   [setOwnOutput](#setownoutput)
+    *   [setInput](#setinput)
         *   [Parameters](#parameters-20)
+    *   [setOwnOutput](#setownoutput)
+        *   [Parameters](#parameters-21)
     *   [getDescriptorTemplate](#getdescriptortemplate)
 *   [SingleKeyAccount](#singlekeyaccount)
 *   [getTaprootOutputKey](#gettaprootoutputkey)
-    *   [Parameters](#parameters-21)
-*   [AppClient](#appclient)
     *   [Parameters](#parameters-22)
-*   [ClientCommandInterpreter](#clientcommandinterpreter)
+*   [AppClient](#appclient)
     *   [Parameters](#parameters-23)
-*   [MerkelizedPsbt](#merkelizedpsbt)
+*   [ClientCommandInterpreter](#clientcommandinterpreter)
     *   [Parameters](#parameters-24)
-*   [Merkle](#merkle)
+*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-25)
-*   [MerkleMap](#merklemap)
+*   [Merkle](#merkle)
     *   [Parameters](#parameters-26)
-*   [WalletPolicy](#walletpolicy)
+*   [MerkleMap](#merklemap)
     *   [Parameters](#parameters-27)
-*   [extract](#extract)
+*   [WalletPolicy](#walletpolicy)
     *   [Parameters](#parameters-28)
-*   [finalize](#finalize)
+*   [extract](#extract)
     *   [Parameters](#parameters-29)
-*   [clearFinalizedInput](#clearfinalizedinput)
+*   [finalize](#finalize)
     *   [Parameters](#parameters-30)
-*   [writePush](#writepush)
+*   [clearFinalizedInput](#clearfinalizedinput)
     *   [Parameters](#parameters-31)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-32)
 *   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-32)
+    *   [Parameters](#parameters-33)
     *   [Examples](#examples-9)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
     *   [Properties](#properties-2)
@@ -337,6 +339,46 @@ Trusted input is the hash of a UTXO that needs to be signed. BIP143 is used for 
 *   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>**  (optional, default `[]`)
 
 Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
+
+#### signWithdrawal
+
+Signs an Acre Withdrawal message with the private key at
+the provided derivation path according to the Bitcoin Signature format
+and returns v, r, s.
+
+##### Parameters
+
+*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), withdrawalData: [AcreWithdrawalData](#acrewithdrawaldata)}**
+
+    *   `$0.path` &#x20;
+    *   `$0.withdrawalData` &#x20;
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
+
+##### Examples
+
+```javascript
+      var withdrawalData = {
+        to: "0xc14972DC5a4443E4f5e89E3655BE48Ee95A795aB",
+        value: "0x0",
+        data: "0xcae9ca510000000000000000000000000e781e9d538895ee99bd6e9bf28664942beff32f00000000000000000000000000000000000000000000000000470de4df820000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001000000000000000000000000006083Bde64CCBF08470a1a0dAa9a0281B4951be7C4b5e4623765ec95cfa6e261406d5c446012eff9300000000000000000000000008dcc842b8ed75efe1f222ebdc22d1b06ef35efff6469f708057266816f0595200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000587f579c500000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000001a1976a914c8e9edf5e915c0482b1b236fc917011a4b943e6e88ac000000000000",
+        operation: "0",
+        safeTxGas: "0x0",
+        baseGas: "0x0",
+        gasPrice: "0x0",
+        gasToken: "0x0000000000000000000000000000000000000000",
+        refundReceiver: "0x0000000000000000000000000000000000000000",
+        nonce: "0xC",
+      };
+      acre.signWithdrawal({"m/44'/0'/0'/0/0", withdrawalData}).then(function(result) {
+        var v = result['v'] + 27 + 4;
+        var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+        console.log("Signature : " + signature);
+        }).catch(function(ex) {console.log(ex);});
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
+
 
 ### AcreBtcNew
 
