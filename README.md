@@ -28,7 +28,7 @@ For a smooth and quick integration:
 #### Table of Contents
 
 *   [bippath](#bippath)
-*   [Btc](#btc)
+*   [Acre](#acre)
     *   [Parameters](#parameters)
     *   [Examples](#examples)
     *   [getWalletXpub](#getwalletxpub)
@@ -55,7 +55,7 @@ For a smooth and quick integration:
         *   [Parameters](#parameters-8)
     *   [getTrustedInputBIP143](#gettrustedinputbip143)
         *   [Parameters](#parameters-9)
-*   [BtcNew](#btcnew)
+*   [AcreBtcNew](#acrebtcnew)
     *   [getWalletXpub](#getwalletxpub-1)
         *   [Parameters](#parameters-10)
     *   [getWalletPublicKey](#getwalletpublickey-1)
@@ -68,7 +68,7 @@ For a smooth and quick integration:
         *   [Parameters](#parameters-14)
 *   [descrTemplFrom](#descrtemplfrom)
     *   [Parameters](#parameters-15)
-*   [BtcOld](#btcold)
+*   [AcreBtcOld](#acrebtcold)
     *   [getWalletPublicKey](#getwalletpublickey-2)
         *   [Parameters](#parameters-16)
         *   [Examples](#examples-7)
@@ -130,9 +130,9 @@ which are commonly used in hierarchical deterministic (HD) wallets.
 It includes functions to convert BIP32 paths to and from different formats,
 extract components from extended public keys (xpubs), and manipulate path elements.
 
-### Btc
+### Acre
 
-Bitcoin API.
+Acre app API.
 
 #### Parameters
 
@@ -143,8 +143,8 @@ Bitcoin API.
 #### Examples
 
 ```javascript
-import Btc from "@blooo/hw-app-acre:";
-const btc = new Btc({ transport, currency: "bitcoin" });
+import Acre from "@blooo/hw-app-acre:";
+const acre = new Acre({ transport, currency: "bitcoin" });
 ```
 
 #### getWalletXpub
@@ -181,8 +181,8 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 ##### Examples
 
 ```javascript
-btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
-btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
+acre.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+acre.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
@@ -199,7 +199,7 @@ You can sign a message according to the Bitcoin Signature format and retrieve v,
 ##### Examples
 
 ```javascript
-btc.signMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
+acre.signMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
 var v = result['v'] + 27 + 4;
 var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
 console.log("Signature : " + signature);
@@ -239,7 +239,7 @@ To sign a transaction involving standard (P2PKH) inputs, call createTransaction 
 ##### Examples
 
 ```javascript
-btc.createTransaction({
+acre.createTransaction({
 inputs: [ [tx1, 1] ],
 associatedKeysets: ["0'/0/0"],
 outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
@@ -267,7 +267,7 @@ To obtain the signature of multisignature (P2SH) inputs, call signP2SHTransactio
 ##### Examples
 
 ```javascript
-btc.signP2SHTransaction({
+acre.signP2SHTransaction({
 inputs: [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ],
 associatedKeysets: ["0'/0/0"],
 outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
@@ -290,7 +290,7 @@ For each UTXO included in your transaction, create a transaction object from the
 ##### Examples
 
 ```javascript
-const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+const tx1 = acre.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
 ```
 
 Returns **[Transaction](#transaction)** the transaction object deserialized from the raw hexadecimal transaction
@@ -306,8 +306,8 @@ Serialize a transaction's outputs to hexadecimal
 ##### Examples
 
 ```javascript
-const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
+const tx1 = acre.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+const outputScript = acre.serializeTransactionOutputs(tx1).toString('hex');
 ```
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)**&#x20;
@@ -338,25 +338,23 @@ Trusted input is the hash of a UTXO that needs to be signed. BIP143 is used for 
 
 Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
-### BtcNew
+### AcreBtcNew
 
-This class implements the same interface as BtcOld (formerly
-named Btc), but interacts with Bitcoin hardware app version 2.1.0+
-which uses a totally new APDU protocol. This new
-protocol is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+This class implements the same interface as AcreBtcOld (formerly
+named Btc), but interacts with Acre hardware app from version 1.0.0
+which uses the same APDU protocol as the Bitcoin app version 2.1.0+.
+This protocol is documented at
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md>
 
-Since the interface must remain compatible with BtcOld, the methods
+Since the interface must remain compatible with AcreBtcOld, the methods
 of this class are quite clunky, because it needs to adapt legacy
-input data into the PSBT process. In the future, a new interface should
-be developed that exposes PSBT to the outer world, which would render
-a much cleaner implementation.
+input data into the PSBT process.
 
 #### getWalletXpub
 
 This is a new method that allow users to get an xpub at a standard path.
 Standard paths are described at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#description>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md#description>
 
 This boils down to paths (N=0 for Bitcoin, N=1 for Testnet):
 M/44'/N'/x'/\*\*
@@ -409,7 +407,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### createPaymentTransaction
 
-Build and sign a transaction. See Btc.createPaymentTransaction for
+Build and sign a transaction. See Acre.createPaymentTransaction for
 details on how to use this method.
 
 This method will convert the legacy arguments, CreateTransactionArg, into
@@ -455,7 +453,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 ### descrTemplFrom
 
 This function returns a descriptor template based on the address format.
-See <https://github.com/LedgerHQ/app-bitcoin-new/blob/develop/doc/wallet.md> for details of
+See <https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md> for details of
 the bitcoin descriptor template.
 
 #### Parameters
@@ -464,9 +462,11 @@ the bitcoin descriptor template.
 
 Returns **DefaultDescriptorTemplate**&#x20;
 
-### BtcOld
+### AcreBtcOld
 
-This Bitcoin old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0
+This old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0 .
+It is never used by Acre, that is based on the latest Bitcoin nano app (2.1.0+).
+This class is kept for compatibility purposes.
 
 #### getWalletPublicKey
 
@@ -489,8 +489,8 @@ This Bitcoin old API is compatible with versions of the Bitcoin nano app that ar
 ##### Examples
 
 ```javascript
-btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
-btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
+acre.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+acre.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
@@ -525,7 +525,7 @@ To sign a transaction involving standard (P2PKH) inputs, call createTransaction 
 ##### Examples
 
 ```javascript
-btc.createTransaction({
+acre.createTransaction({
 inputs: [ [tx1, 1] ],
 associatedKeysets: ["0'/0/0"],
 outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
@@ -658,7 +658,7 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)** The output key
 ### AppClient
 
 This class encapsulates the APDU protocol documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md>
 
 #### Parameters
 
@@ -696,7 +696,7 @@ The reason for this is the limited amount of memory available to the app,
 so it can't always store the full psbt in memory.
 
 The signing process is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#sign_psbt>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md#sign_psbt>
 
 #### Parameters
 
@@ -704,9 +704,9 @@ The signing process is documented at
 
 ### Merkle
 
-This class implements the merkle tree used by Ledger Bitcoin app v2+,
+This class implements the merkle tree used by Ledger Acre app,
 which is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/merkle.md>
 
 #### Parameters
 
@@ -716,7 +716,7 @@ which is documented at
 ### MerkleMap
 
 This implements "Merkelized Maps", documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md#merkleized-maps>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/merkle.md#merkleized-maps>
 
 A merkelized map consist of two merkle trees, one for the keys of
 a map and one for the values of the same map, thus the two merkle
@@ -736,7 +736,7 @@ how to construct output scripts from keys. A "Wallet Policy" consists
 of a "Descriptor Template" and a list of "keys". A key is basically
 a serialized BIP32 extended public key with some added derivation path
 information. This is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/wallet.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md>
 
 #### Parameters
 
@@ -829,8 +829,8 @@ complemantary fields as needed in the future.
 #### Examples
 
 ```javascript
-const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
+const tx1 = acre.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+const outputScript = acre.serializeTransactionOutputs(tx1).toString('hex');
 ```
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)**&#x20;

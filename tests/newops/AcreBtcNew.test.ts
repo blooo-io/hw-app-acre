@@ -3,7 +3,7 @@ import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocke
 import { TransportReplayer } from "@ledgerhq/hw-transport-mocker/lib/openTransportReplayer";
 import ecc from "tiny-secp256k1";
 import { getXpubComponents, pathArrayToString } from "../../src/bip32";
-import BtcNew from "../../src/BtcNew";
+import AcreBtcNew from "../../src/AcreBtcNew";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { splitTransaction } from "../../src/splitTransaction";
@@ -149,8 +149,8 @@ async function testGetWalletXpub(path: string, version = 0x043587cf) {
   const expectedXpub =
     "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
   client.mockGetPubkeyResponse(path, expectedXpub);
-  const btc = new BtcNew(client);
-  const result = await btc.getWalletXpub({ path: path, xpubVersion: version });
+  const acre = new AcreBtcNew(client);
+  const result = await acre.getWalletXpub({ path: path, xpubVersion: version });
   expect(result).toEqual(expectedXpub);
 }
 async function testGetWalletPublicKey(
@@ -173,13 +173,13 @@ async function testGetWalletPublicKey(
     "testaddress",
   );
 
-  const btcNew = new BtcNew(client);
+  const acreBtcNew = new AcreBtcNew(client);
   const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
-  const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
+  const result = await acreBtcNew.getWalletPublicKey(path, { format: addressFormat });
   log('address', result.bitcoinAddress)
   verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
   console.log('notworkingforsure')
-  const resultAccount = await btcNew.getWalletPublicKey(accountPath);
+  const resultAccount = await acreBtcNew.getWalletPublicKey(accountPath);
   verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
 }
 
@@ -190,8 +190,8 @@ async function testSignMessageReplayer(
   const client = new AppClient(transport);
   const path = accountPath + "/0/0";
 
-  const btcNew = new BtcNew(client);
-  const result = await btcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
+  const acreBtcNew = new AcreBtcNew(client);
+  const result = await acreBtcNew.signMessage({ path: path, messageHex: Buffer.from("test").toString("hex") });
   expect(result).toEqual({
     v: 0,
     r: 'df44ce2f8f6f62fec9b0d01bd66bc91aa73984e0cf02ad8ff7bf12f8013ba779',
@@ -219,8 +219,8 @@ async function testSignWithdrawalReplayer() {
   };
   const path = "m/44'/0'/0'/0/0";
 
-  const btcNew = new BtcNew(client);
-  const result = await btcNew.signWithdrawal({path: path, withdrawalData: withdrawalData});
+  const acreBtcNew = new AcreBtcNew(client);
+  const result = await acreBtcNew.signWithdrawal({path: path, withdrawalData: withdrawalData});
   expect(result).toEqual({
     v: 0,
     r: '88c6c773f8d3101e30bbcc7811f8b553d222265023b981ad2f12dfa0da8ae8c2',

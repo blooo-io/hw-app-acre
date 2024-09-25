@@ -12,12 +12,13 @@ import { AcreWithdrawalData } from "./types";
 export type { AddressFormat };
 
 /**
- * @class BtcOld
- * @description This Bitcoin old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0
- *
+ * @class AcreBtcOld
+ * @description This old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0 .
+ * It is never used by Acre, that is based on the latest Bitcoin nano app (2.1.0+).
+ * This class is kept for compatibility purposes.
  */
 
-export default class BtcOld {
+export default class AcreBtcOld {
   constructor(private transport: Transport) {}
 
   private derivationsCache = {};
@@ -76,8 +77,8 @@ export default class BtcOld {
    * - cashaddr in case of Bitcoin Cash
    *
    * @example
-   * btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
-   * btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
+   * acre.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+   * acre.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
    */
   getWalletPublicKey(
     path: string,
@@ -123,7 +124,7 @@ export default class BtcOld {
    * @param useTrustedInputForSegwit trust inputs for segwit transactions
    * @return the signed transaction ready to be broadcast
    * @example
-  btc.createTransaction({
+  acre.createTransaction({
    inputs: [ [tx1, 1] ],
    associatedKeysets: ["0'/0/0"],
    outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
@@ -150,7 +151,7 @@ export default class BtcOld {
   }
 
  /**
-  * This function will never be called from a BtcOld context, it is only delcared here for compatibility with
+  * This function will never be called from a AcreBtcOld context, it is only delcared here for compatibility with
   * the current framework, throwing an error in case it is ever reached.
   */
   async signWithdrawal({ path, withdrawalData }: { path: string; withdrawalData: AcreWithdrawalData }): Promise<{
@@ -159,7 +160,7 @@ export default class BtcOld {
     s: string;
   }> {
     throw new Error(
-      "@blooo/hw-app-acre: Acre Withdrawal transaction is not compatible with the legacy BtcOld client. Please use the BtcNew client",
+      "@blooo/hw-app-acre: Acre Withdrawal transaction is not compatible with the legacy AcreBtcOld client. Please use the AcreBtcNew client",
     );
   }
 }

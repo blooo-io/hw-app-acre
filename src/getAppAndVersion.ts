@@ -27,7 +27,7 @@ export const getAppAndVersion = async (transport: Transport): Promise<AppAndVers
 
 export const checkIsBtcLegacy = async (transport: Transport): Promise<boolean> => {
   try {
-    // Call old btc API, it will throw an exception with new btc app. It is a workaround to differentiate new/old btc nano app
+    // Call old btc API, it will throw an exception with acre app (based on the new btc app).
     await transport.send(0xe0, 0xc4, 0, 0);
   } catch (e: unknown) {
     return false;

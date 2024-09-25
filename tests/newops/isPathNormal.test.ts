@@ -1,4 +1,4 @@
-import { isPathNormal } from "../../src/BtcNew";
+import { isPathNormal } from "../../src/AcreBtcNew";
 
 describe("isPathNormal", () => {
   describe("should return true for normal and supported paths", () => {

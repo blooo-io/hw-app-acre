@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Transport from "@ledgerhq/hw-transport";
 import bs58check from "bs58check";
-import Btc from "../../src/Btc";
-import BtcNew from "../../src/BtcNew";
+import Acre from "../../src/Acre";
+import AcreBtcNew from "../../src/AcreBtcNew";
 import { BufferWriter } from "../../src/buffertools";
 import { CreateTransactionArg } from "../../src/createTransaction";
 import { AddressFormat } from "../../src/getWalletPublicKey";
@@ -17,10 +17,10 @@ export async function runSignTransaction(
   client: TestingClient,
   transport: Transport,
 ): Promise<string> {
-  const btcNew = new BtcNew(client);
-  // btc is needed to perform some functions like splitTransaction.
-  const btc = new Btc({ transport });
-  const accountType = getAccountType(testTx.vin[0], btc);
+  const acreBtcNew = new AcreBtcNew(client);
+  // acre is needed to perform some functions like splitTransaction.
+  const acre = new Acre({ transport });
+  const accountType = getAccountType(testTx.vin[0], acre);
   const additionals: string[] = [];
   if (accountType == StandardPurpose.p2wpkh) {
     additionals.push("bech32");
@@ -33,7 +33,7 @@ export async function runSignTransaction(
   const inputs = testTx.vin.map((input, index) => {
     const path = testPaths.ins[index];
     associatedKeysets.push(path);
-    const inputData = createInput(input, btc);
+    const inputData = createInput(input, acre);
     const pubkey = getPubkey(index, accountType, testTx, inputData[0], inputData[1]);
     const mockXpub = creatDummyXpub(pubkey);
     client.mockGetPubkeyResponse(path, mockXpub);
@@ -72,7 +72,7 @@ export async function runSignTransaction(
     onDeviceStreaming: arg => logCallback("CALLBACK: " + JSON.stringify(arg)),
   };
   logCallback("Start createPaymentTransaction");
-  const tx = await btcNew.createPaymentTransaction(arg);
+  const tx = await acreBtcNew.createPaymentTransaction(arg);
   logCallback("Done createPaymentTransaction");
   // console.log(callbacks);
   return tx;
@@ -129,12 +129,12 @@ function getSignature(testTxInput: CoreInput, accountType: StandardPurpose): Buf
   throw new Error();
 }
 
-function getAccountType(coreInput: CoreInput, btc: Btc): StandardPurpose {
+function getAccountType(coreInput: CoreInput, acre: Acre): StandardPurpose {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");
   }
-  const splitSpentTx = btc.splitTransaction(spentTx, true);
+  const splitSpentTx = acre.splitTransaction(spentTx, true);
   const spentOutput = splitSpentTx.outputs![coreInput.vout];
   const script = spentOutput.script;
   if (script.length == 34 && script[0] == 0x51) {
@@ -158,12 +158,12 @@ export function creatDummyXpub(pubkey: Buffer): string {
   return bs58check.encode(xpubDecoded);
 }
 
-function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, string | null, number] {
+function createInput(coreInput: CoreInput, acre: Acre): [Transaction, number, string | null, number] {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");
   }
-  const splitSpentTx = btc.splitTransaction(spentTx, true);
+  const splitSpentTx = acre.splitTransaction(spentTx, true);
   return [splitSpentTx, coreInput.vout, null, coreInput.sequence];
 }
 

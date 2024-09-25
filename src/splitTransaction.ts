@@ -154,6 +154,6 @@ export function splitTransaction(
     nExpiryHeight,
     extraData,
   };
-  log("btc", `splitTransaction ${transactionHex}:\n${formatTransactionDebug(t)}`);
+  log("acre", `splitTransaction ${transactionHex}:\n${formatTransactionDebug(t)}`);
   return t;
 }
