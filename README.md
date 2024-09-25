@@ -354,7 +354,7 @@ input data into the PSBT process.
 
 This is a new method that allow users to get an xpub at a standard path.
 Standard paths are described at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#description>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md#description>
 
 This boils down to paths (N=0 for Bitcoin, N=1 for Testnet):
 M/44'/N'/x'/\*\*
@@ -453,7 +453,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 ### descrTemplFrom
 
 This function returns a descriptor template based on the address format.
-See <https://github.com/LedgerHQ/app-bitcoin-new/blob/develop/doc/wallet.md> for details of
+See <https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md> for details of
 the bitcoin descriptor template.
 
 #### Parameters
@@ -464,7 +464,9 @@ Returns **DefaultDescriptorTemplate**&#x20;
 
 ### AcreBtcOld
 
-This Bitcoin old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0
+This old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0 .
+It is never used by Acre, that is based on the latest Bitcoin nano app (2.1.0+).
+This class is kept for compatibility purposes.
 
 #### getWalletPublicKey
 
@@ -656,7 +658,7 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)** The output key
 ### AppClient
 
 This class encapsulates the APDU protocol documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md>
 
 #### Parameters
 
@@ -694,7 +696,7 @@ The reason for this is the limited amount of memory available to the app,
 so it can't always store the full psbt in memory.
 
 The signing process is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#sign_psbt>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md#sign_psbt>
 
 #### Parameters
 
@@ -702,9 +704,9 @@ The signing process is documented at
 
 ### Merkle
 
-This class implements the merkle tree used by Ledger Bitcoin app v2+,
+This class implements the merkle tree used by Ledger Acre app,
 which is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/merkle.md>
 
 #### Parameters
 
@@ -714,7 +716,7 @@ which is documented at
 ### MerkleMap
 
 This implements "Merkelized Maps", documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md#merkleized-maps>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/merkle.md#merkleized-maps>
 
 A merkelized map consist of two merkle trees, one for the keys of
 a map and one for the values of the same map, thus the two merkle
@@ -734,7 +736,7 @@ how to construct output scripts from keys. A "Wallet Policy" consists
 of a "Descriptor Template" and a list of "keys". A key is basically
 a serialized BIP32 extended public key with some added derivation path
 information. This is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/wallet.md>
+<https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md>
 
 #### Parameters
 

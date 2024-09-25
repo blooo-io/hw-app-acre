@@ -17,7 +17,7 @@ import { checkIsBtcLegacy, getAppAndVersion } from "./getAppAndVersion";
 
 /**
  * @class Acre
- * @description Bitcoin API.
+ * @description Acre API.
  * @param transport The transport layer used for communication.
  * @param scrambleKey This parameter is deprecated and no longer needed.
  * @param currency The currency to use, defaults to "bitcoin".
@@ -61,10 +61,10 @@ export default class Acre {
         case "bitcoin":
         case "bitcoin_testnet":
         case "qtum":
-          // new APDU (nano app API) for currencies using app-bitcoin-new implementation
+          // new APDU (nano app API) for currencies using app-acre implementation
           return new AcreBtcNew(new AppClient(this._transport));
         default:
-          // old APDU (legacy API) for currencies using legacy bitcoin app implementation
+          // old APDU (legacy API) for currencies using legacy bitcoin app implementation (not used by acre)
           return new AcreBtcOld(this._transport);
       }
     })();

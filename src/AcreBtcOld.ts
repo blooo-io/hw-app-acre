@@ -13,8 +13,9 @@ export type { AddressFormat };
 
 /**
  * @class AcreBtcOld
- * @description This Bitcoin old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0
- *
+ * @description This old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0 .
+ * It is never used by Acre, that is based on the latest Bitcoin nano app (2.1.0+).
+ * This class is kept for compatibility purposes.
  */
 
 export default class AcreBtcOld {

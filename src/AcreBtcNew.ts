@@ -33,7 +33,7 @@ import { log } from "@ledgerhq/logs";
  * named Btc), but interacts with Bitcoin hardware app version 2.1.0+
  * which uses a totally new APDU protocol. This new
  * protocol is documented at
- * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
+ * https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md
  *
  * Since the interface must remain compatible with AcreBtcOld, the methods
  * of this class are quite clunky, because it needs to adapt legacy
@@ -48,7 +48,7 @@ export default class AcreBtcNew {
   /**
    * This is a new method that allow users to get an xpub at a standard path.
    * Standard paths are described at
-   * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#description
+   * https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md#description
    *
    * This boils down to paths (N=0 for Bitcoin, N=1 for Testnet):
    * M/44'/N'/x'/**
@@ -515,7 +515,7 @@ export default class AcreBtcNew {
 
 /**
  * This function returns a descriptor template based on the address format.
- * See https://github.com/LedgerHQ/app-bitcoin-new/blob/develop/doc/wallet.md for details of
+ * See https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md for details of
  * the bitcoin descriptor template.
  */
 function descrTemplFrom(addressFormat: AddressFormat): DefaultDescriptorTemplate {
