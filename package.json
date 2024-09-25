@@ -23,9 +23,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Btc.js",
-  "module": "lib-es/Btc.js",
-  "types": "lib/Btc.d.ts",
+  "main": "lib/Acre.js",
+  "module": "lib-es/Acre.js",
+  "types": "lib/Acre.d.ts",
   "typesVersions": {
     "*": {
       "lib/*": [
@@ -36,7 +36,7 @@
       ],
       "*": [
         "lib/*",
-        "lib/Btc.d.ts"
+        "lib/Acre.d.ts"
       ]
     }
   },
@@ -54,8 +54,8 @@
       "default": "./lib-es/*.js"
     },
     ".": {
-      "require": "./lib/Btc.js",
-      "default": "./lib-es/Btc.js"
+      "require": "./lib/Acre.js",
+      "default": "./lib-es/Acre.js"
     },
     "./package.json": "./package.json"
   },

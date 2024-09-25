@@ -174,7 +174,7 @@ export default class BtcNew {
   }
 
   /**
-   * Build and sign a transaction. See Btc.createPaymentTransaction for
+   * Build and sign a transaction. See Acre.createPaymentTransaction for
    * details on how to use this method.
    *
    * This method will convert the legacy arguments, CreateTransactionArg, into

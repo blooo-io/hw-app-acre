@@ -16,17 +16,17 @@ import { signP2SHTransaction } from "./signP2SHTransaction";
 import { checkIsBtcLegacy, getAppAndVersion } from "./getAppAndVersion";
 
 /**
- * @class Btc
+ * @class Acre
  * @description Bitcoin API.
  * @param transport The transport layer used for communication.
  * @param scrambleKey This parameter is deprecated and no longer needed.
  * @param currency The currency to use, defaults to "bitcoin".
  * @example
- * import Btc from "@blooo/hw-app-acre:";
- * const btc = new Btc({ transport, currency: "bitcoin" });
+ * import Acre from "@blooo/hw-app-acre:";
+ * const btc = new Acre({ transport, currency: "bitcoin" });
  */
 
-export default class Btc {
+export default class Acre {
   // Transport instance
   private _transport: Transport;
   // The specific implementation used, determined by the nano app and its version.

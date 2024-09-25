@@ -28,7 +28,7 @@ For a smooth and quick integration:
 #### Table of Contents
 
 *   [bippath](#bippath)
-*   [Btc](#btc)
+*   [Acre](#btc)
     *   [Parameters](#parameters)
     *   [Examples](#examples)
     *   [getWalletXpub](#getwalletxpub)
@@ -130,9 +130,9 @@ which are commonly used in hierarchical deterministic (HD) wallets.
 It includes functions to convert BIP32 paths to and from different formats,
 extract components from extended public keys (xpubs), and manipulate path elements.
 
-### Btc
+### Acre
 
-Bitcoin API.
+Acre app API.
 
 #### Parameters
 
@@ -143,8 +143,8 @@ Bitcoin API.
 #### Examples
 
 ```javascript
-import Btc from "@blooo/hw-app-acre:";
-const btc = new Btc({ transport, currency: "bitcoin" });
+import Acre from "@blooo/hw-app-acre:";
+const btc = new Acre({ transport, currency: "bitcoin" });
 ```
 
 #### getWalletXpub
@@ -341,16 +341,14 @@ Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/G
 ### BtcNew
 
 This class implements the same interface as BtcOld (formerly
-named Btc), but interacts with Bitcoin hardware app version 2.1.0+
-which uses a totally new APDU protocol. This new
-protocol is documented at
-<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+named Btc), but interacts with Acre hardware app from version 1.0.0
+which uses the same APDU protocol as the Bitcoin app version 2.1.0+.
+This protocol is documented at
+<https://github.com/blooo-io/app-acre/blob/develop/doc/acre.md>
 
 Since the interface must remain compatible with BtcOld, the methods
 of this class are quite clunky, because it needs to adapt legacy
-input data into the PSBT process. In the future, a new interface should
-be developed that exposes PSBT to the outer world, which would render
-a much cleaner implementation.
+input data into the PSBT process.
 
 #### getWalletXpub
 
@@ -409,7 +407,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### createPaymentTransaction
 
-Build and sign a transaction. See Btc.createPaymentTransaction for
+Build and sign a transaction. See Acre.createPaymentTransaction for
 details on how to use this method.
 
 This method will convert the legacy arguments, CreateTransactionArg, into

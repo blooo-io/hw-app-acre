@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Transport from "@ledgerhq/hw-transport";
 import bs58check from "bs58check";
-import Btc from "../../src/Btc";
+import Acre from "../../src/Acre";
 import BtcNew from "../../src/BtcNew";
 import { BufferWriter } from "../../src/buffertools";
 import { CreateTransactionArg } from "../../src/createTransaction";
@@ -19,7 +19,7 @@ export async function runSignTransaction(
 ): Promise<string> {
   const btcNew = new BtcNew(client);
   // btc is needed to perform some functions like splitTransaction.
-  const btc = new Btc({ transport });
+  const btc = new Acre({ transport });
   const accountType = getAccountType(testTx.vin[0], btc);
   const additionals: string[] = [];
   if (accountType == StandardPurpose.p2wpkh) {
@@ -129,7 +129,7 @@ function getSignature(testTxInput: CoreInput, accountType: StandardPurpose): Buf
   throw new Error();
 }
 
-function getAccountType(coreInput: CoreInput, btc: Btc): StandardPurpose {
+function getAccountType(coreInput: CoreInput, btc: Acre): StandardPurpose {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");
@@ -158,7 +158,7 @@ export function creatDummyXpub(pubkey: Buffer): string {
   return bs58check.encode(xpubDecoded);
 }
 
-function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, string | null, number] {
+function createInput(coreInput: CoreInput, btc: Acre): [Transaction, number, string | null, number] {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");

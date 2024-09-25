@@ -2,7 +2,7 @@
 import Transport from "@ledgerhq/hw-transport";
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos";
 import { getXpubComponents } from "../src/bip32";
-import Btc from "../src/Btc";
+import Acre from "../src/Acre";
 import BtcNew from "../src/BtcNew";
 import { compressPublicKey } from "../src/compressPublicKey";
 import { AppClient } from "../src/newops/appClient";
@@ -155,9 +155,9 @@ async function transport(): Promise<SpeculosTransport> {
 async function impl(
   variant: "old" | "new",
   transport: Transport
-): Promise<Btc | BtcNew> {
+): Promise<Acre | BtcNew> {
   if (variant === "old") {
-    return new Btc(transport);
+    return new Acre(transport);
   }
   const client = new AppClient(transport);
   const btc = new BtcNew(client);
