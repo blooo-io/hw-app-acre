@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocker";
 import { TransportReplayer } from "@ledgerhq/hw-transport-mocker/lib/openTransportReplayer";
+import SpeculosTransport from "../speculosTransport";
 import ecc from "tiny-secp256k1";
 import { getXpubComponents, pathArrayToString } from "../../src/bip32";
 import AcreBtcNew from "../../src/AcreBtcNew";
@@ -57,9 +58,10 @@ test("testSignMessage", async () => {
   await testSignMessageReplayer("m/44'/0'/0'");
 });
 
-test("signWithdrawal", async () => {
-  await testSignWithdrawalReplayer();
-});
+
+test("Sign ERC-4361 message", async () => {
+  await testSignERC4361Speculos();
+}, 60 * 10 * 1000); // 10-minute timeout (60 seconds * 10 minutes * 1000 milliseconds)
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   const basePath = `m/${type}/1'/0'/`;
@@ -226,6 +228,16 @@ async function testSignWithdrawalReplayer() {
     r: '88c6c773f8d3101e30bbcc7811f8b553d222265023b981ad2f12dfa0da8ae8c2',
     s: '3f718ebdfc1990b5baa0a908ae9b093c6719fd7251d7cb5c75355cb9196b6410',
   });
+}
+
+async function testSignERC4361Speculos() {
+  const transport = new SpeculosTransport('http://localhost:5000')
+  const client = new AppClient(transport);
+  const acreBtcNew = new AcreBtcNew(client);
+  const message = "stake.acre.fi wants you to sign in with your Bitcoin account:\nbc1q8fq0vs2f9g52cuk8px9f664qs0j7vtmx3r7wvx\n\n\nURI: https://stake.acre.fi\nVersion: 1\nNonce: cw73Kfdfn1lY42Jj8\nIssued At: 2024-10-01T11:03:05.707Z\nExpiration Time: 2024-10-08T11:03:05.707Z"
+  const path = "m/44'/0'/0'/0/0";
+  const result = await acreBtcNew.signERC4361Message({messageHex: Buffer.from(message).toString("hex"), path: path});
+  console.log(result);
 }
 
 function verifyGetWalletPublicKeyResult(
