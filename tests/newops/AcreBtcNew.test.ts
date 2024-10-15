@@ -8,7 +8,7 @@ import AcreBtcNew from "../../src/AcreBtcNew";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { splitTransaction } from "../../src/splitTransaction";
-import { withdrawalAPDUs, signMessageAPDUs } from "./apdus";
+import { withdrawalAPDUs, signMessageAPDUs, signERC4361APDUs } from "./apdus";
 import {
   StandardPurpose,
   addressFormatFromDescriptorTemplate,
@@ -58,10 +58,13 @@ test("testSignMessage", async () => {
   await testSignMessageReplayer("m/44'/0'/0'");
 });
 
+test("signWithdrawal", async () => {
+  await testSignWithdrawalReplayer();
+});
 
-test("Sign ERC-4361 message", async () => {
-  await testSignERC4361Speculos();
-}, 60 * 10 * 1000); // 10-minute timeout (60 seconds * 10 minutes * 1000 milliseconds)
+test("Sign ERC4361 message", async () => {
+  await testSignERC4361MessageReplayer("m/44'/0'/0'");
+});
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
   const basePath = `m/${type}/1'/0'/`;
@@ -230,14 +233,22 @@ async function testSignWithdrawalReplayer() {
   });
 }
 
-async function testSignERC4361Speculos() {
-  const transport = new SpeculosTransport('http://localhost:5000')
+async function testSignERC4361MessageReplayer(
+  accountPath: string,
+) {
+  const transport = await openTransportReplayer(RecordStore.fromString(signERC4361APDUs));
   const client = new AppClient(transport);
+  const path = accountPath + "/0/0";
+
   const acreBtcNew = new AcreBtcNew(client);
   const message = "stake.acre.fi wants you to sign in with your Bitcoin account:\nbc1q8fq0vs2f9g52cuk8px9f664qs0j7vtmx3r7wvx\n\n\nURI: https://stake.acre.fi\nVersion: 1\nNonce: cw73Kfdfn1lY42Jj8\nIssued At: 2024-10-01T11:03:05.707Z\nExpiration Time: 2024-10-08T11:03:05.707Z"
-  const path = "m/44'/0'/0'/0/0";
   const result = await acreBtcNew.signERC4361Message({messageHex: Buffer.from(message).toString("hex"), path: path});
-  console.log(result);
+  expect(result).toEqual({
+    v: 1,
+    r: 'f30ff91331b840cc97560b468d9dce0647afbef7fd74819773721a096905da7e',
+    s: '664a3ce374f1951e40222d433cd8d6977dde08af6320acc8dd90fa35ed1c8ed8'
+  });
+
 }
 
 function verifyGetWalletPublicKeyResult(
