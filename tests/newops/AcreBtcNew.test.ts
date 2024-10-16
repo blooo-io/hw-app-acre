@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocker";
 import { TransportReplayer } from "@ledgerhq/hw-transport-mocker/lib/openTransportReplayer";
+import SpeculosTransport from "../speculosTransport";
 import ecc from "tiny-secp256k1";
 import { getXpubComponents, pathArrayToString } from "../../src/bip32";
 import AcreBtcNew from "../../src/AcreBtcNew";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { splitTransaction } from "../../src/splitTransaction";
-import { withdrawalAPDUs, signMessageAPDUs } from "./apdus";
+import { withdrawalAPDUs, signMessageAPDUs, signERC4361APDUs } from "./apdus";
 import {
   StandardPurpose,
   addressFormatFromDescriptorTemplate,
@@ -59,6 +60,10 @@ test("testSignMessage", async () => {
 
 test("signWithdrawal", async () => {
   await testSignWithdrawalReplayer();
+});
+
+test("Sign ERC4361 message", async () => {
+  await testSignERC4361MessageReplayer("m/44'/0'/0'");
 });
 
 function testPaths(type: StandardPurpose): { ins: string[]; out?: string } {
@@ -226,6 +231,24 @@ async function testSignWithdrawalReplayer() {
     r: '88c6c773f8d3101e30bbcc7811f8b553d222265023b981ad2f12dfa0da8ae8c2',
     s: '3f718ebdfc1990b5baa0a908ae9b093c6719fd7251d7cb5c75355cb9196b6410',
   });
+}
+
+async function testSignERC4361MessageReplayer(
+  accountPath: string,
+) {
+  const transport = await openTransportReplayer(RecordStore.fromString(signERC4361APDUs));
+  const client = new AppClient(transport);
+  const path = accountPath + "/0/0";
+
+  const acreBtcNew = new AcreBtcNew(client);
+  const message = "stake.acre.fi wants you to sign in with your Bitcoin account:\nbc1q8fq0vs2f9g52cuk8px9f664qs0j7vtmx3r7wvx\n\n\nURI: https://stake.acre.fi\nVersion: 1\nNonce: cw73Kfdfn1lY42Jj8\nIssued At: 2024-10-01T11:03:05.707Z\nExpiration Time: 2024-10-08T11:03:05.707Z"
+  const result = await acreBtcNew.signERC4361Message({messageHex: Buffer.from(message).toString("hex"), path: path});
+  expect(result).toEqual({
+    v: 1,
+    r: 'f30ff91331b840cc97560b468d9dce0647afbef7fd74819773721a096905da7e',
+    s: '664a3ce374f1951e40222d433cd8d6977dde08af6320acc8dd90fa35ed1c8ed8'
+  });
+
 }
 
 function verifyGetWalletPublicKeyResult(

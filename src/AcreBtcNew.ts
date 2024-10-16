@@ -313,6 +313,7 @@ export default class AcreBtcNew {
       s,
     };
   }
+
   cleanHexPrefix(hexString: string): string {
     let cleanedHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
     if (cleanedHex.length % 2 !== 0) {
@@ -322,8 +323,6 @@ export default class AcreBtcNew {
 }
 
   formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): AcreWithdrawalDataBuffer {
-    console.log("withdrawalData", withdrawalData);
-    console.log("dataLength", withdrawalData.data.length);
     const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to.toString()), "hex").slice(-20);
 
     let withdrawalValueBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.value), "hex").slice(-32);
@@ -385,7 +384,6 @@ export default class AcreBtcNew {
     }> {
       const pathElements: number[] = pathStringToArray(path);
       const withdrawalDataBuffer = this.formatAcreWithdrawalData(withdrawalData);
-      console.log("withdrawalDataBuffer", withdrawalDataBuffer);
 
       const sig = await this.client.signWithdrawal(pathElements, withdrawalDataBuffer);
       const buf = Buffer.from(sig, "base64");
@@ -400,6 +398,32 @@ export default class AcreBtcNew {
         s,
       };
     }
+
+  /**
+   * Signs a ERC4361 hex-formatted message with the private key at
+   * the provided derivation path according to the Bitcoin Signature format
+   * and returns v, r, s.
+   */
+  async signERC4361Message({ path, messageHex }: { path: string; messageHex: string }): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    const pathElements: number[] = pathStringToArray(path);
+    const message = Buffer.from(messageHex, "hex");
+    const sig = await this.client.signERC4361Message(message, pathElements);
+    const buf = Buffer.from(sig, "base64");
+
+    const v = buf.readUInt8() - 27 - 4;
+    const r = buf.slice(1, 33).toString("hex");
+    const s = buf.slice(33, 65).toString("hex");
+
+    return {
+      v,
+      r,
+      s,
+    };
+  }
 
   /**
    * Calculates an output script along with public key and possible redeemScript

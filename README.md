@@ -57,26 +57,32 @@ For a smooth and quick integration:
         *   [Parameters](#parameters-9)
     *   [signWithdrawal](#signwithdrawal)
         *   [Parameters](#parameters-10)
+        *   [Examples](#examples-7)
+    *   [signERC4361Message](#signerc4361message)
+        *   [Parameters](#parameters-11)
+        *   [Examples](#examples-8)
 *   [AcreBtcNew](#acrebtcnew)
     *   [getWalletXpub](#getwalletxpub-1)
-        *   [Parameters](#parameters-11)
-    *   [getWalletPublicKey](#getwalletpublickey-1)
         *   [Parameters](#parameters-12)
-    *   [createPaymentTransaction](#createpaymenttransaction-1)
+    *   [getWalletPublicKey](#getwalletpublickey-1)
         *   [Parameters](#parameters-13)
-    *   [signMessage](#signmessage-1)
+    *   [createPaymentTransaction](#createpaymenttransaction-1)
         *   [Parameters](#parameters-14)
-    *   [signWithdrawal](#signwithdrawal-1)
+    *   [signMessage](#signmessage-1)
         *   [Parameters](#parameters-15)
+    *   [signWithdrawal](#signwithdrawal-1)
+        *   [Parameters](#parameters-16)
+    *   [signERC4361Message](#signerc4361message-1)
+        *   [Parameters](#parameters-17)
 *   [descrTemplFrom](#descrtemplfrom)
-    *   [Parameters](#parameters-16)
+    *   [Parameters](#parameters-18)
 *   [AcreBtcOld](#acrebtcold)
     *   [getWalletPublicKey](#getwalletpublickey-2)
-        *   [Parameters](#parameters-17)
-        *   [Examples](#examples-7)
+        *   [Parameters](#parameters-19)
+        *   [Examples](#examples-9)
     *   [createPaymentTransaction](#createpaymenttransaction-2)
-        *   [Parameters](#parameters-18)
-        *   [Examples](#examples-8)
+        *   [Parameters](#parameters-20)
+        *   [Examples](#examples-10)
 *   [CreateTransactionArg](#createtransactionarg)
     *   [Properties](#properties)
 *   [AddressFormat](#addressformat)
@@ -84,39 +90,39 @@ For a smooth and quick integration:
     *   [Properties](#properties-1)
 *   [AccountType](#accounttype)
     *   [spendingCondition](#spendingcondition)
-        *   [Parameters](#parameters-19)
-    *   [setInput](#setinput)
-        *   [Parameters](#parameters-20)
-    *   [setOwnOutput](#setownoutput)
         *   [Parameters](#parameters-21)
+    *   [setInput](#setinput)
+        *   [Parameters](#parameters-22)
+    *   [setOwnOutput](#setownoutput)
+        *   [Parameters](#parameters-23)
     *   [getDescriptorTemplate](#getdescriptortemplate)
 *   [SingleKeyAccount](#singlekeyaccount)
 *   [getTaprootOutputKey](#gettaprootoutputkey)
-    *   [Parameters](#parameters-22)
-*   [AppClient](#appclient)
-    *   [Parameters](#parameters-23)
-*   [ClientCommandInterpreter](#clientcommandinterpreter)
     *   [Parameters](#parameters-24)
-*   [MerkelizedPsbt](#merkelizedpsbt)
+*   [AppClient](#appclient)
     *   [Parameters](#parameters-25)
-*   [Merkle](#merkle)
+*   [ClientCommandInterpreter](#clientcommandinterpreter)
     *   [Parameters](#parameters-26)
-*   [MerkleMap](#merklemap)
+*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-27)
-*   [WalletPolicy](#walletpolicy)
+*   [Merkle](#merkle)
     *   [Parameters](#parameters-28)
-*   [extract](#extract)
+*   [MerkleMap](#merklemap)
     *   [Parameters](#parameters-29)
-*   [finalize](#finalize)
+*   [WalletPolicy](#walletpolicy)
     *   [Parameters](#parameters-30)
-*   [clearFinalizedInput](#clearfinalizedinput)
+*   [extract](#extract)
     *   [Parameters](#parameters-31)
-*   [writePush](#writepush)
+*   [finalize](#finalize)
     *   [Parameters](#parameters-32)
+*   [clearFinalizedInput](#clearfinalizedinput)
+    *   [Parameters](#parameters-33)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-34)
 *   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-33)
-    *   [Examples](#examples-9)
+    *   [Parameters](#parameters-35)
+    *   [Examples](#examples-11)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
     *   [Properties](#properties-2)
 *   [TransactionInput](#transactioninput)
@@ -353,8 +359,6 @@ and returns v, r, s.
     *   `$0.path` &#x20;
     *   `$0.withdrawalData` &#x20;
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
-
 ##### Examples
 
 ```javascript
@@ -376,6 +380,31 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
         console.log("Signature : " + signature);
         }).catch(function(ex) {console.log(ex);});
 ```
+
+#### signERC4361Message
+
+Signs an Ethereum Sign-In (ERC-4361) message with the private key at
+the provided derivation path according to the Bitcoin Signature format
+and returns v, r, s.
+
+##### Parameters
+
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
+*   `messageHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
+
+##### Examples
+
+```javascript
+acre.signERC4361Message("44'/60'/0'/0'/0", Buffer.from("Example ERC-4361 message").toString("hex")).then(function(result) {
+  const v = result['v'] + 27 + 4;
+  const signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+  console.log("Signature : " + signature);
+}).catch(function(ex) {console.log(ex);});
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
+
+**Note:** The message is restricted to maximum 128 character lines.
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
 
@@ -492,6 +521,21 @@ and returns v, r, s.
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
 
+#### signERC4361Message
+
+Signs an ERC-4361 (Sign-In with Ethereum) formatted message with the private key at
+the provided derivation path according to the Bitcoin Signature format
+and returns v, r, s.
+
+##### Parameters
+
+*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), messageHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}**
+
+    *   `$0.path` The BIP32 derivation path of the key to use for signing
+    *   `$0.messageHex` The ERC-4361 formatted message to sign, in hexadecimal format
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>**&#x20;
+
 ### descrTemplFrom
 
 This function returns a descriptor template based on the address format.
@@ -499,20 +543,6 @@ See <https://github.com/blooo-io/app-acre/blob/develop/doc/wallet.md> for detail
 the bitcoin descriptor template.
 
 #### Parameters
-
-*   `addressFormat` **[AddressFormat](#addressformat)**&#x20;
-
-Returns **DefaultDescriptorTemplate**&#x20;
-
-### AcreBtcOld
-
-This old API is compatible with versions of the Bitcoin nano app that are earlier than 2.1.0 .
-It is never used by Acre, that is based on the latest Bitcoin nano app (2.1.0+).
-This class is kept for compatibility purposes.
-
-#### getWalletPublicKey
-
-##### Parameters
 
 *   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
 *   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?**&#x20;

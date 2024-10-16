@@ -20,7 +20,8 @@ enum BitcoinIns {
   SIGN_PSBT = 0x04,
   GET_MASTER_FINGERPRINT = 0x05,
   SIGN_MESSAGE = 0x10,
-  SIGN_WITHDRAW = 0x11
+  SIGN_WITHDRAW = 0x11,
+  SIGN_ERC4361_MESSAGE = 0x12
 }
 
 enum FrameworkIns {
@@ -246,5 +247,31 @@ export class AppClient {
     );
 
     return response.toString("base64")
+  }
+
+  async signERC4361Message(message: Buffer, pathElements: number[]): Promise<string> {
+    if (pathElements.length > 6) {
+      throw new Error("Path too long. At most 6 levels allowed.");
+    }
+
+    const clientInterpreter = new ClientCommandInterpreter(() => {});
+
+    // prepare ClientCommandInterpreter
+    const nChunks = Math.ceil(message.length / 64);
+    const chunks: Buffer[] = [];
+    for (let i = 0; i < nChunks; i++) {
+      chunks.push(message.subarray(64 * i, 64 * i + 64));
+    }
+
+    clientInterpreter.addKnownList(chunks);
+    const chunksRoot = new Merkle(chunks.map(m => hashLeaf(m))).getRoot();
+
+    const response = await this.makeRequest(
+      BitcoinIns.SIGN_ERC4361_MESSAGE,
+      Buffer.concat([pathElementsToBuffer(pathElements), createVarint(message.length), chunksRoot]),
+      clientInterpreter,
+    );
+
+    return response.toString("base64");
   }
 }
