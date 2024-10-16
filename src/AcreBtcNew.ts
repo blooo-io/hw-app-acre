@@ -323,8 +323,6 @@ export default class AcreBtcNew {
 }
 
   formatAcreWithdrawalData(withdrawalData: AcreWithdrawalData): AcreWithdrawalDataBuffer {
-    console.log("withdrawalData", withdrawalData);
-    console.log("dataLength", withdrawalData.data.length);
     const to = Buffer.from(this.cleanHexPrefix(withdrawalData.to.toString()), "hex").slice(-20);
 
     let withdrawalValueBuffer = Buffer.from(this.cleanHexPrefix(withdrawalData.value), "hex").slice(-32);
@@ -386,7 +384,6 @@ export default class AcreBtcNew {
     }> {
       const pathElements: number[] = pathStringToArray(path);
       const withdrawalDataBuffer = this.formatAcreWithdrawalData(withdrawalData);
-      console.log("withdrawalDataBuffer", withdrawalDataBuffer);
 
       const sig = await this.client.signWithdrawal(pathElements, withdrawalDataBuffer);
       const buf = Buffer.from(sig, "base64");
@@ -415,7 +412,6 @@ export default class AcreBtcNew {
     const pathElements: number[] = pathStringToArray(path);
     const message = Buffer.from(messageHex, "hex");
     const sig = await this.client.signERC4361Message(message, pathElements);
-    console.log("sig", sig);
     const buf = Buffer.from(sig, "base64");
 
     const v = buf.readUInt8() - 27 - 4;
