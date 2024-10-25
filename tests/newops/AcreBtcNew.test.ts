@@ -183,7 +183,6 @@ async function testGetWalletPublicKey(
   const result = await acreBtcNew.getWalletPublicKey(path, { format: addressFormat });
   log('address', result.bitcoinAddress)
   verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
-  console.log('notworkingforsure')
   const resultAccount = await acreBtcNew.getWalletPublicKey(accountPath);
   verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
 }
