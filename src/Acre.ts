@@ -198,6 +198,31 @@ export default class Acre {
   }
 
   /**
+   * Signs a ERC4361 hex-formatted message with the private key at
+   * the provided derivation path according to the Bitcoin Signature format
+   * and returns v, r, s.
+   * @example
+   * const path = "m/44'/0'/0'/0/0";
+   * const messageHex = "48656c6c6f20576f726c64"; // "Hello World" in hex
+   * const result = await acre.signERC4361Message({path: path, messageHex: messageHex});
+   */
+  signERC4361Message(
+    path: string,
+    messageHex: string,
+  ): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    return this.changeImplIfNecessary().then(impl => {
+      return impl.signERC4361Message({
+        path,
+        messageHex,
+      });
+    });
+  }
+
+  /**
    * To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
    * @param inputs is an array of [ transaction, output_index, optional redeem script, optional sequence ] where
    *

@@ -163,6 +163,20 @@ export default class AcreBtcOld {
       "@blooo/hw-app-acre: Acre Withdrawal transaction is not compatible with the legacy AcreBtcOld client. Please use the AcreBtcNew client",
     );
   }
+
+  /**
+   * This function will never be called from a AcreBtcOld context, it is only declared here for compatibility with
+   * the current framework, throwing an error in case it is ever reached.
+   */
+  async signERC4361Message({ path, messageHex }: { path: string; messageHex: string }): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    throw new Error(
+      "@blooo/hw-app-acre: ERC4361 message signing is not compatible with the legacy AcreBtcOld client. Please use the AcreBtcNew client"
+    );
+  }
 }
 
 function makeFingerprint(compressedPubKey) {
