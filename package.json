@@ -63,10 +63,12 @@
   "dependencies": {
     "@ledgerhq/hw-transport": "6.31.3",
     "@ledgerhq/logs": "6.12.0",
+    "@safe-global/protocol-kit": "^5.0.4",
     "bip32-path": "^0.4.2",
     "bitcoinjs-lib": "^5.2.0",
     "bs58": "^4.0.1",
     "bs58check": "^2.1.2",
+    "ethers": "^6.13.4",
     "invariant": "^2.2.4",
     "ripemd160": "2",
     "semver": "^7.3.5",
